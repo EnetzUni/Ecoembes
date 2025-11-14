@@ -1,32 +1,32 @@
 plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.5.7'
-	id 'io.spring.dependency-management' version '1.1.7'
+	id 'io.spring.dependency-management' version '1.1.6'
 }
 
-group = 'com.example'
-version = '0.0.1-SNAPSHOT'
-description = 'Demo project for Spring Boot'
-
-java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
-	}
-}
+group = 'es.deusto.sd.auctions'
+version = '2.0'
 
 repositories {
 	mavenCentral()
 }
 
-dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	runtimeOnly 'com.h2database:h2'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
-tasks.named('test') {
-	useJUnitPlatform()
+dependencies {
+	// Spring Boot Starter Web for building web applications
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	// SpringDoc OpenAPI UI Dependency this is needed to use Swagger annotations
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13'
+    
+	// Spring Boot Starter Data JPA for working with JPA and Hibernate
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'	
+
+	// H2 Database for in-memory database
+	runtimeOnly 'com.h2database:h2'	
 }

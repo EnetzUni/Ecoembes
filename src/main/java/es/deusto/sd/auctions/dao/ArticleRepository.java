@@ -13,3 +13,5 @@ import es.deusto.sd.auctions.entity.Article;
 @Repository
 public interface ArticleRepository extends JpaRepository<Article, Long> {
 }
+
+//push

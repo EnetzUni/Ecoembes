@@ -1,4 +1,4 @@
-package es.deusto.sd.ecoembes.Service;
+package es.deusto.sd.ecoembes.service;
 
 import java.util.HashMap;
 import java.util.List;

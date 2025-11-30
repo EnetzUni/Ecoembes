@@ -1,0 +1,67 @@
+-- Insert plants
+INSERT INTO recycling_plant (name, location) VALUES ('Plant A', 'Madrid');
+INSERT INTO recycling_plant (name, location) VALUES ('Plant B', 'Barcelona');
+
+-- Insert daily capacities for Plant A (id=1)
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-01', 100.5, 1);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-02', 102.0, 1);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-03', 98.3, 1);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-04', 105.2, 1);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-05', 99.9, 1);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-06', 101.4, 1);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-07', 97.8, 1);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-08', 103.0, 1);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-09', 104.5, 1);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-10', 100.0, 1);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-11', 102.7, 1);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-12', 99.5, 1);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-13', 101.9, 1);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-14', 103.2, 1);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-15', 98.7, 1);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-16', 100.8, 1);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-17', 102.1, 1);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-18', 99.0, 1);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-19', 104.3, 1);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-20', 101.6, 1);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-21', 100.9, 1);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-22', 98.4, 1);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-23', 102.3, 1);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-24', 101.0, 1);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-25', 103.5, 1);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-26', 99.7, 1);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-27', 100.2, 1);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-28', 102.6, 1);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-29', 101.8, 1);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-30', 100.5, 1);
+
+-- Insert daily capacities for Plant B (id=2)
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-01', 80.0, 2);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-02', 82.5, 2);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-03', 79.3, 2);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-04', 81.2, 2);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-05', 83.0, 2);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-06', 78.9, 2);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-07', 80.5, 2);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-08', 82.0, 2);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-09', 79.7, 2);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-10', 81.5, 2);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-11', 80.8, 2);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-12', 83.2, 2);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-13', 78.5, 2);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-14', 81.9, 2);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-15', 82.4, 2);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-16', 80.2, 2);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-17', 79.9, 2);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-18', 81.0, 2);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-19', 82.7, 2);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-20', 80.3, 2);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-21', 81.6, 2);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-22', 79.5, 2);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-23', 82.1, 2);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-24', 80.9, 2);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-25', 81.3, 2);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-26', 79.8, 2);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-27', 80.6, 2);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-28', 82.4, 2);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-29', 81.1, 2);
+INSERT INTO daily_plant_capacity (date, capacity, plant_id) VALUES ('2025-11-30', 80.0, 2);

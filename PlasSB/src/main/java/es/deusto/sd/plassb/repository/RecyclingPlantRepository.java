@@ -1,9 +1,8 @@
-package es.deusto.sd.ecoembes.dao;
+package es.deusto.sd.plassb.repository;
 
+import es.deusto.sd.plassb.entity.RecyclingPlant;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
-import es.deusto.sd.ecoembes.entity.RecyclingPlant;
 
 @Repository
 public interface RecyclingPlantRepository extends JpaRepository<RecyclingPlant, Long> {

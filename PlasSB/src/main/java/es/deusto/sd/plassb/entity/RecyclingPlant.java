@@ -1,6 +1,5 @@
-package es.deusto.sd.ecoembes.entity;
+package es.deusto.sd.plassb.entity;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -25,6 +24,10 @@ public class RecyclingPlant {
     @OneToMany(mappedBy = "recyclingPlant", cascade = CascadeType.ALL)
     private List<DailyPlantCapacity> dailyCapacities;
 
+    // ------------ //
+    // Constructors //
+    // ------------ //
+
     public RecyclingPlant() {}
 
     public RecyclingPlant(String name, String location) {
@@ -32,9 +35,10 @@ public class RecyclingPlant {
         this.location = location;
     }
 
-    // -----------------------
-    // Getters y Setters
-    // -----------------------
+    // ----------------- //
+    // Getters & Setters //
+    // ----------------- //
+    
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
 
@@ -47,25 +51,10 @@ public class RecyclingPlant {
     public List<DailyPlantCapacity> getDailyCapacities() { return dailyCapacities; }
     public void setDailyCapacities(List<DailyPlantCapacity> dailyCapacities) { this.dailyCapacities = dailyCapacities; }
 
-    // -----------------------
-    // Método para obtener capacidad del día actual
-    // -----------------------
-    public float getCapacityForToday() {
-        LocalDate today = LocalDate.now();
-        if (dailyCapacities != null) {
-            for (DailyPlantCapacity dpc : dailyCapacities) {
-                if (dpc.getDate().equals(today)) {
-                    return dpc.getCapacity();
-                }
-            }
-        }
-        // Si no hay registro para hoy, asumimos 0
-        return 0f;
-    }
+    // ----------------- //
+    // hashCode & Equals //
+    // ----------------- //
 
-    // -----------------------
-    // hashCode y equals
-    // -----------------------
     @Override
     public int hashCode() { return Objects.hash(id); }
 
@@ -76,6 +65,10 @@ public class RecyclingPlant {
         RecyclingPlant other = (RecyclingPlant) obj;
         return id == other.id;
     }
+
+    // -------- //
+    // toString //
+    // -------- //
 
     @Override
     public String toString() {

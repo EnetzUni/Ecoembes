@@ -1,4 +1,4 @@
-package es.deusto.sd.ecoembes.external;
+package external;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

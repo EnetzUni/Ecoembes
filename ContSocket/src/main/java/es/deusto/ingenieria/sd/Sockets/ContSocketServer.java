@@ -9,7 +9,7 @@ public class ContSocketServer {
     private static int numClients = 0;
     
     // Puerto compatible con tu cliente (asegúrate que en Spring Boot usas el 8081)
-    private static final int DEFAULT_PORT = 8081;
+    private static final int DEFAULT_PORT = 8080;
 
     public static void main(String args[]) {
         int serverPort = DEFAULT_PORT;

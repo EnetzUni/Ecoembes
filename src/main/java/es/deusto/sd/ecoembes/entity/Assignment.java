@@ -24,7 +24,8 @@ public class Assignment {
     private RecyclingPlant recyclingPlant;
 
     // Dumpsters assigned (each dumpster belongs to 1 assignment)
-    @OneToMany(mappedBy = "assignment", cascade = CascadeType.ALL)
+    @ManyToMany
+    @JoinTable(name = "assignment_dumpster",joinColumns = @JoinColumn(name = "assignment_id"),inverseJoinColumns = @JoinColumn(name = "dumpster_id"))
     private List<Dumpster> dumpsters;
 
     public Assignment() {}

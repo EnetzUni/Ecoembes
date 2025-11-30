@@ -1,12 +1,15 @@
 package es.deusto.sd.ecoembes.entity;
 
+import java.util.List;
 import java.util.Objects;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 
 @Entity
 public class RecyclingPlant {
@@ -20,18 +23,20 @@ public class RecyclingPlant {
 
     private String location;
 
-   
-    private float capacity;
+    // Historico de capacidades diarias
+    @OneToMany(mappedBy = "recyclingPlant", cascade = CascadeType.ALL)
+    private List<DailyPlantCapacity> dailyCapacities;
 
-    public RecyclingPlant() {
-    }
+    public RecyclingPlant() {}
 
-    public RecyclingPlant(String name, String location, float capacity) {
+    public RecyclingPlant(String name, String location) {
         this.name = name;
         this.location = location;
-        this.capacity = capacity;
     }
 
+    // -----------------------
+    // Getters y Setters
+    // -----------------------
     public long getId() {
         return id;
     }
@@ -56,14 +61,17 @@ public class RecyclingPlant {
         this.location = location;
     }
 
-    public float getCapacity() {
-        return capacity;
+    public List<DailyPlantCapacity> getDailyCapacities() {
+        return dailyCapacities;
     }
 
-    public void setCapacity(float capacity) {
-        this.capacity = capacity;
+    public void setDailyCapacities(List<DailyPlantCapacity> dailyCapacities) {
+        this.dailyCapacities = dailyCapacities;
     }
 
+    // -----------------------
+    // hashCode y equals
+    // -----------------------
     @Override
     public int hashCode() {
         return Objects.hash(id);
@@ -73,16 +81,17 @@ public class RecyclingPlant {
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
+        if (obj == null || getClass() != obj.getClass())
             return false;
         RecyclingPlant other = (RecyclingPlant) obj;
         return id == other.id;
     }
 
+    // -----------------------
+    // toString
+    // -----------------------
     @Override
     public String toString() {
-        return "RecyclingPlant [id=" + id + ", name=" + name + ", location=" + location + ", capacity=" + capacity + "]";
+        return "RecyclingPlant [id=" + id + ", name=" + name + ", location=" + location + "]";
     }
 }

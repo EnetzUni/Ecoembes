@@ -1,4 +1,4 @@
-package es.deusto.sd.ecoembes.external.gateway;
+package es.deusto.sd.ecoembes.external;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -9,26 +9,25 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import es.deusto.sd.ecoembes.external.dto.ExternalPlantInfo;
+import es.deusto.sd.ecoembes.external.ExternalPlantInfo;
+import es.deusto.sd.ecoembes.external.IExternalRecyclingGateway;
 
 @Component
-public class RestRecyclingGateway implements RecyclingGateway {
+public class RestRecyclingGateway implements IExternalRecyclingGateway {
 
     private final ObjectMapper mapper = new ObjectMapper();
     private final HttpClient client = HttpClient.newHttpClient();
-    private final String PLASSB_URL = "http://localhost:8085/api";
+    private final String BASE_URL = "http://localhost:8085/api"; // cambiar según planta
 
     @Override
-    public Optional<ExternalPlantInfo> getDailyCapacity() {
+    public Optional<ExternalPlantInfo> getPlantInfo(long plantId) {
         try {
-            HttpRequest req = HttpRequest.newBuilder()
-                .uri(URI.create(PLASSB_URL + "/capacity"))
-                .GET()
-                .build();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(BASE_URL + "/plants/" + plantId))
+                    .GET()
+                    .build();
 
-            String body = client.send(req, HttpResponse.BodyHandlers.ofString())
-                                .body();
-
+            String body = client.send(request, HttpResponse.BodyHandlers.ofString()).body();
             ExternalPlantInfo info = mapper.readValue(body, ExternalPlantInfo.class);
             return Optional.of(info);
 
@@ -38,22 +37,19 @@ public class RestRecyclingGateway implements RecyclingGateway {
     }
 
     @Override
-    public boolean sendAssignment(long dumpsterId, long numContainers) {
+    public boolean sendAssignment(ExternalAssignmentDTO dto) {
         try {
-            String json = String.format("""
-            {"dumpsterId": %d, "numContainers": %d}
-            """, dumpsterId, numContainers);
+            String json = mapper.writeValueAsString(dto);
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(BASE_URL + "/assignment"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .build();
 
-            HttpRequest req = HttpRequest.newBuilder()
-                .uri(URI.create(PLASSB_URL + "/assignment"))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(json))
-                .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return response.statusCode() == 200;
 
-            HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString());
-            return resp.statusCode() == 200;
-
-        } catch (Exception ex) {
+        } catch (Exception e) {
             return false;
         }
     }

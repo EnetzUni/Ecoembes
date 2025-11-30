@@ -6,22 +6,18 @@ import org.springframework.stereotype.Component;
 public class ExternalGatewayFactory {
 
     private final RestRecyclingGateway restGateway;
-    private final SocketGateway socketGateway;
+    private final SocketRecyclingGateway socketGateway;
 
     public ExternalGatewayFactory(RestRecyclingGateway restGateway,
-                                  SocketGateway socketGateway) {
+                                  SocketRecyclingGateway socketGateway) {
         this.restGateway = restGateway;
         this.socketGateway = socketGateway;
     }
 
     public IExternalRecyclingGateway getGateway(ExternalGatewayType type) {
-        switch (type) {
-            case REST:
-                return restGateway;
-            case SOCKET:
-                return socketGateway;
-            default:
-                throw new IllegalArgumentException("Unsupported external gateway type");
-        }
+        return switch(type) {
+            case REST -> restGateway;
+            case SOCKET -> socketGateway;
+        };
     }
 }

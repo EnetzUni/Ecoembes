@@ -1,14 +1,16 @@
 package es.deusto.sd.ecoembes.entity;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 
@@ -23,44 +25,40 @@ public class Dumpster {
 
     private float maxCapacity;
 
+    // Último fill level registrado
     private float fillLevel;
 
+    // Fecha de la última actualización
     @Temporal(TemporalType.TIMESTAMP)
-    private Date date;
+    private Date lastUpdate;
 
-    // -------------------------
-    // RELACIÓN CON ASSIGNMENT
-    // -------------------------
-    @ManyToOne
-    @JoinColumn(name = "assignment_id")
-    private Assignment assignment;
-    // -------------------------
+    // Histórico de registros de fill level
+    @OneToMany(mappedBy = "dumpster", cascade = CascadeType.ALL)
+    private List<FillLevelRecord> fillHistory;
 
-    // No-arg constructor required by JPA
+    // Asignaciones en las que ha participado este dumpster
+    @ManyToMany(mappedBy = "dumpsters")
+    private List<Assignment> assignments;
+
+    // -----------------------
+    // Constructores
+    // -----------------------
     public Dumpster() {}
 
-    public Dumpster(long id, String location, float maxCapacity, float fillLevel, Date date) {
-        this.id = id;
+    public Dumpster(String location, float maxCapacity) {
         this.location = location;
         this.maxCapacity = maxCapacity;
-        this.fillLevel = fillLevel;
-        this.date = date;
     }
 
+    // -----------------------
+    // Getters y Setters
+    // -----------------------
     public long getId() {
         return id;
     }
 
     public void setId(long id) {
         this.id = id;
-    }
-
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
     }
 
     public String getLocation() {
@@ -87,15 +85,33 @@ public class Dumpster {
         this.fillLevel = fillLevel;
     }
 
-    // Getter / Setter de Assignment
-    public Assignment getAssignment() {
-        return assignment;
+    public Date getLastUpdate() {
+        return lastUpdate;
     }
 
-    public void setAssignment(Assignment assignment) {
-        this.assignment = assignment;
+    public void setLastUpdate(Date lastUpdate) {
+        this.lastUpdate = lastUpdate;
     }
 
+    public List<FillLevelRecord> getFillHistory() {
+        return fillHistory;
+    }
+
+    public void setFillHistory(List<FillLevelRecord> fillHistory) {
+        this.fillHistory = fillHistory;
+    }
+
+    public List<Assignment> getAssignments() {
+        return assignments;
+    }
+
+    public void setAssignments(List<Assignment> assignments) {
+        this.assignments = assignments;
+    }
+
+    // -----------------------
+    // hashCode y equals
+    // -----------------------
     @Override
     public int hashCode() {
         return Objects.hash(id);
@@ -104,15 +120,16 @@ public class Dumpster {
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
-        Dumpster other = (Dumpster) obj;
-        return id == other.id;
+        if (!(obj instanceof Dumpster)) return false;
+        return id == ((Dumpster) obj).id;
     }
 
+    // -----------------------
+    // toString
+    // -----------------------
     @Override
     public String toString() {
-        return "Dumpster [id=" + id + ", location=" + location + ", maxCapacity=" + maxCapacity 
-                + ", fillLevel=" + fillLevel + ", date=" + date + "]";
+        return "Dumpster [id=" + id + ", location=" + location + ", maxCapacity=" + maxCapacity
+                + ", currentFillLevel=" + fillLevel + ", lastUpdate=" + lastUpdate + "]";
     }
 }

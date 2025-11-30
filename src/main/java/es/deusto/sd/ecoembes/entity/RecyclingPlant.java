@@ -20,7 +20,7 @@ public class RecyclingPlant {
 
     private String location;
 
-    // capacity in liters
+   
     private float capacity;
 
     public RecyclingPlant() {

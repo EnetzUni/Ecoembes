@@ -18,7 +18,7 @@ public class DumpsterService {
         for (Dumpster d : dumpsters) {
             if (d.getId() == id) {
                 d.setFillLevel(fillLevel);
-                d.setDate(date);
+                d.setLastUpdate(date);
                 return d;
             }
         }
@@ -32,7 +32,7 @@ public class DumpsterService {
 
     public List<Dumpster> queryUsage(long id, Date start, Date end) {
         return dumpsters.stream()
-                .filter(d -> d.getId() == id && d.getDate().after(start) && d.getDate().before(end))
+                .filter(d -> d.getId() == id && d.getLastUpdate().after(start) && d.getLastUpdate().before(end))
                 .collect(Collectors.toList());
     }
 
@@ -44,7 +44,7 @@ public class DumpsterService {
 
     public List<Dumpster> getDumpstersByPostalCode(String postalCode, Date date) {
         return dumpsters.stream()
-                .filter(d -> d.getLocation().contains(postalCode) && d.getDate().equals(date))
+                .filter(d -> d.getLocation().contains(postalCode) && d.getLastUpdate().equals(date))
                 .collect(Collectors.toList());
     }
 }

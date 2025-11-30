@@ -4,7 +4,9 @@ import es.deusto.sd.plassb.entity.DailyPlantCapacity;
 import es.deusto.sd.plassb.repository.DailyPlantCapacityRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class DailyPlantCapacityService {
@@ -21,5 +23,10 @@ public class DailyPlantCapacityService {
 
     public DailyPlantCapacity save(DailyPlantCapacity capacity) {
         return repository.save(capacity);
+    }
+
+    public Optional<Float> getCapacityByPlantAndDate(long plantId, Date date) {
+        Optional<DailyPlantCapacity> capacity = repository.findByRecyclingPlantIdAndDate(plantId, date);
+        return capacity.map(DailyPlantCapacity::getCapacity);
     }
 }

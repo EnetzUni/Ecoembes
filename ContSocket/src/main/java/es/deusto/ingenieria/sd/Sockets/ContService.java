@@ -68,12 +68,13 @@ public class ContService extends Thread {
             String plantId = tokenizer.nextToken();
 
             // Lógica simple para responder a tu cliente
-            if ("GET_ASSIGNMENT".equals(command)) {
+            // CORRECCIÓN: Ahora validamos también que el plantId sea el correcto
+            if ("GET_ASSIGNMENT".equals(command) && PLANT_NAME.equals(plantId)) {
                 // Simulamos capacidad (ej. 150 toneladas) y disponibilidad (true)
                 // Formato esperado: OK#PlantaID#Capacidad#Aceptado
                 return "OK" + DELIMITER + PLANT_NAME + DELIMITER + "150.0" + DELIMITER + "true";
             } else {
-                return "ERROR" + DELIMITER + "Comando desconocido";
+                return "ERROR" + DELIMITER + "Comando desconocido o ID de planta incorrecto";
             }
         } catch (Exception e) {
             return "ERROR" + DELIMITER + "Error procesando";

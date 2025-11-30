@@ -21,18 +21,39 @@ public class AssignmentDTO {
     }
 
     // Getters y Setters
-    public long getId() { return id; }
-    public void setId(long id) { this.id = id; }
+    public long getId() { 
+    	return id; 
+    	}
+    public void setId(long id) { 
+    	this.id = id; 
+    	}
 
-    public Date getDate() { return date; }
-    public void setDate(Date date) { this.date = date; }
+    public Date getDate() { 
+    	return date; 
+    	}
+    public void setDate(Date date) { 
+    	this.date = date; 
+    	}
 
-    public long getEmployeeId() { return employeeId; }
-    public void setEmployeeId(long employeeId) { this.employeeId = employeeId; }
+    public long getEmployeeId() { 
+    	return employeeId; 
+    	}
+    public void setEmployeeId(long employeeId) { 
+    	this.employeeId = employeeId; 
+    	}
 
-    public long getRecyclingPlantId() { return recyclingPlantId; }
-    public void setRecyclingPlantId(long recyclingPlantId) { this.recyclingPlantId = recyclingPlantId; }
+    public long getRecyclingPlantId() { 
+    	return recyclingPlantId; 
+    	}
+    public void setRecyclingPlantId(long recyclingPlantId) { 
+    	this.recyclingPlantId = recyclingPlantId; 
+    	}
 
-    public List<DumpsterDTO> getDumpsters() { return dumpsters; }
-    public void setDumpsters(List<DumpsterDTO> dumpsters) { this.dumpsters = dumpsters; }
+    public List<DumpsterDTO> getDumpsters() { 
+    	return dumpsters; 
+    	}
+    public void setDumpsters(List<DumpsterDTO> dumpsters) { 
+    	this.dumpsters = dumpsters; 
+    	}
+    
 }

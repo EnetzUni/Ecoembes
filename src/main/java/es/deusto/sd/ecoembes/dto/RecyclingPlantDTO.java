@@ -20,18 +20,38 @@ public class RecyclingPlantDTO {
     }
 
     // Getters y Setters
-    public long getId() { return id; }
-    public void setId(long id) { this.id = id; }
+    public long getId() {
+    	return id; 
+    	}
+    public void setId(long id) {
+    	this.id = id; 
+    	}
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public String getName() { 
+    	return name; 
+    }
+    public void setName(String name) { 
+    	this.name = name; 
+    	}
 
-    public String getLocation() { return location; }
-    public void setLocation(String location) { this.location = location; }
+    public String getLocation() { 
+    	return location; 
+    	}
+    public void setLocation(String location) { 
+    	this.location = location; 
+    	}
 
-    public float getCapacity() { return capacity; }
-    public void setCapacity(float capacity) { this.capacity = capacity; }
+    public float getCapacity() { 
+    	return capacity; 
+    	}
+    public void setCapacity(float capacity) { 
+    	this.capacity = capacity;
+    	}
 
-    public List<DailyPlantCapacityDTO> getDailyCapacities() { return dailyCapacities; }
-    public void setDailyCapacities(List<DailyPlantCapacityDTO> dailyCapacities) { this.dailyCapacities = dailyCapacities; }
+    public List<DailyPlantCapacityDTO> getDailyCapacities() { 
+    	return dailyCapacities; 
+    	}
+    public void setDailyCapacities(List<DailyPlantCapacityDTO> dailyCapacities) { 
+    	this.dailyCapacities = dailyCapacities; 
+    	}
 }

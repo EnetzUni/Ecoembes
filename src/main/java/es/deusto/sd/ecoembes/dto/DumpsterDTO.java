@@ -23,21 +23,45 @@ public class DumpsterDTO {
     }
 
     // Getters y Setters
-    public long getId() { return id; }
-    public void setId(long id) { this.id = id; }
+    public long getId() { 
+    	return id; 
+    	}
+    public void setId(long id) { 
+    	this.id = id; 
+    	}
 
-    public String getLocation() { return location; }
-    public void setLocation(String location) { this.location = location; }
+    public String getLocation() { 
+    	return location; 
+    	}
+    public void setLocation(String location) {
+    	this.location = location; 
+    	}
 
-    public float getMaxCapacity() { return maxCapacity; }
-    public void setMaxCapacity(float maxCapacity) { this.maxCapacity = maxCapacity; }
+    public float getMaxCapacity() { 
+    	return maxCapacity; 
+    	}
+    public void setMaxCapacity(float maxCapacity) { 
+    	this.maxCapacity = maxCapacity; 
+    	}
 
-    public float getFillLevel() { return fillLevel; }
-    public void setFillLevel(float fillLevel) { this.fillLevel = fillLevel; }
+    public float getFillLevel() { 
+    	return fillLevel; 
+    	}
+    public void setFillLevel(float fillLevel) { 
+    	this.fillLevel = fillLevel; 
+    	}
 
-    public Date getLastUpdate() { return lastUpdate; }
-    public void setLastUpdate(Date lastUpdate) { this.lastUpdate = lastUpdate; }
+    public Date getLastUpdate() { 
+    	return lastUpdate; 
+    	}
+    public void setLastUpdate(Date lastUpdate) { 
+    	this.lastUpdate = lastUpdate; 
+    	}
 
-    public List<FillLevelRecordDTO> getFillHistory() { return fillHistory; }
-    public void setFillHistory(List<FillLevelRecordDTO> fillHistory) { this.fillHistory = fillHistory; }
+    public List<FillLevelRecordDTO> getFillHistory() { 
+    	return fillHistory; 
+    	}
+    public void setFillHistory(List<FillLevelRecordDTO> fillHistory) { 
+    	this.fillHistory = fillHistory; 
+    	}
 }

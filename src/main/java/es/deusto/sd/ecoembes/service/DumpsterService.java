@@ -6,44 +6,51 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import es.deusto.sd.ecoembes.dao.DumpsterRepository;
 import es.deusto.sd.ecoembes.entity.Dumpster;
 
 @Service
 public class DumpsterService {
 
-    // Simulación de base de datos en memoria (en prototipo)
-    private List<Dumpster> dumpsters;
+    private final DumpsterRepository dumpsterRepository;
 
+    public DumpsterService(DumpsterRepository dumpsterRepository) {
+        this.dumpsterRepository = dumpsterRepository;
+    }
+
+    
+    //FUNCION: UPDATE DUMPESTER INFO
     public Dumpster updateDumpsterInfo(long id, float fillLevel, Date date) {
-        for (Dumpster d : dumpsters) {
-            if (d.getId() == id) {
-                d.setFillLevel(fillLevel);
-                d.setLastUpdate(date);
-                return d;
-            }
-        }
-        throw new RuntimeException("Dumpster not found");
+        Dumpster d = dumpsterRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Dumpster not found"));
+        d.setFillLevel(fillLevel);
+        d.setLastUpdate(date);
+        return dumpsterRepository.save(d);
     }
 
+    //FUNCION: CREATE DUMPSTER
     public Dumpster createDumpster(Dumpster dumpster) {
-        dumpsters.add(dumpster);
-        return dumpster;
+        return dumpsterRepository.save(dumpster);
     }
 
+    
+    //FUNCION: QUERY DUMPSTER USAGE
     public List<Dumpster> queryUsage(long id, Date start, Date end) {
-        return dumpsters.stream()
-                .filter(d -> d.getId() == id && d.getLastUpdate().after(start) && d.getLastUpdate().before(end))
+        return dumpsterRepository.findById(id).stream()
+                .filter(d -> !d.getLastUpdate().before(start) && !d.getLastUpdate().after(end))
                 .collect(Collectors.toList());
     }
 
+    //FUNCION: CHECK DUMPSTER STATUS
     public String getDumpsterStatus(float fillLevel) {
         if (fillLevel < 0.7f) return "GREEN";
         if (fillLevel < 0.95f) return "ORANGE";
         return "RED";
     }
 
+    
     public List<Dumpster> getDumpstersByPostalCode(String postalCode, Date date) {
-        return dumpsters.stream()
+        return dumpsterRepository.findAll().stream()
                 .filter(d -> d.getLocation().contains(postalCode) && d.getLastUpdate().equals(date))
                 .collect(Collectors.toList());
     }

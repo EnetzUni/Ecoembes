@@ -16,9 +16,17 @@ public class FillLevelRecordDTO {
     }
 
     // Getters y Setters
-    public Date getDate() { return date; }
-    public void setDate(Date date) { this.date = date; }
+    public Date getDate() { 
+    	return date; 
+    	}
+    public void setDate(Date date) { 
+    	this.date = date; 
+    	}
 
-    public float getFillLevel() { return fillLevel; }
-    public void setFillLevel(float fillLevel) { this.fillLevel = fillLevel; }
+    public float getFillLevel() { 
+    	return fillLevel; 
+    	}
+    public void setFillLevel(float fillLevel) { 
+    	this.fillLevel = fillLevel; 
+    	}
 }

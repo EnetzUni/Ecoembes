@@ -1,4 +1,5 @@
 eclipse.preferences.version=1
+<<<<<<< HEAD
 org.eclipse.jdt.core.compiler.annotation.missingNonNullByDefaultAnnotation=ignore
 org.eclipse.jdt.core.compiler.annotation.nonnull=javax.annotation.Nonnull
 org.eclipse.jdt.core.compiler.annotation.nonnullbydefault=javax.annotation.ParametersAreNonnullByDefault
@@ -10,3 +11,8 @@ org.eclipse.jdt.core.compiler.problem.nullSpecViolation=warning
 org.eclipse.jdt.core.compiler.problem.nullUncheckedConversion=ignore
 org.eclipse.jdt.core.compiler.problem.potentialNullReference=warning
 org.eclipse.jdt.core.compiler.problem.syntacticNullAnalysisForFields=enabled
+=======
+org.eclipse.jdt.core.compiler.codegen.targetPlatform=21
+org.eclipse.jdt.core.compiler.compliance=21
+org.eclipse.jdt.core.compiler.source=21
+>>>>>>> 0d09d1c6808b25b04cb13340c2af99d82284aba3

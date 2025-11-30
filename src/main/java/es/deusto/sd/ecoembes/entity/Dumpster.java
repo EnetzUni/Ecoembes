@@ -1,5 +1,6 @@
 package es.deusto.sd.ecoembes.entity;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -34,7 +35,7 @@ public class Dumpster {
 
     // Histórico de registros de fill level
     @OneToMany(mappedBy = "dumpster", cascade = CascadeType.ALL)
-    private List<FillLevelRecord> fillHistory;
+    private List<FillLevelRecord> fillHistory = new ArrayList<>();
 
     // Asignaciones en las que ha participado este dumpster
     @ManyToMany(mappedBy = "dumpsters")

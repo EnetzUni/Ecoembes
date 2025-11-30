@@ -64,6 +64,11 @@ public class Employee {
     public void setPassword(String password) {
         this.password = password;
     }
+    
+    public boolean checkPassword(String passwordToCheck) {
+        return this.password.equals(passwordToCheck);
+    }
+
 
     @Override
     public int hashCode() {

@@ -1,6 +1,9 @@
 package es.deusto.sd.ecoembes.service;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 import es.deusto.sd.ecoembes.dao.EmployeeRepository;
@@ -10,34 +13,45 @@ import es.deusto.sd.ecoembes.entity.Employee;
 public class AuthService {
 
     private final EmployeeRepository employeeRepository;
-    private final Map<String, Employee> loggedInTokens = new HashMap<>();
+
+    // Almacena los tokens de sesión de los empleados conectados
+    private static Map<String, Employee> tokenStore = new HashMap<>();
 
     public AuthService(EmployeeRepository employeeRepository) {
         this.employeeRepository = employeeRepository;
     }
 
-    //FUNCION: LOGIN 
-    public String login(String email, String password) {
-        Employee emp = employeeRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
-        if (!emp.getPassword().equals(password)) {
-            throw new RuntimeException("Invalid password");
+    // Login: devuelve token si credenciales correctas
+    public Optional<String> login(String email, String password) {
+        Optional<Employee> employee = employeeRepository.findByEmail(email);
+
+        if (employee.isPresent() && employee.get().checkPassword(password)) {
+            String token = generateToken();  // generar token único
+            tokenStore.put(token, employee.get());
+            return Optional.of(token);
+        } else {
+            return Optional.empty();
         }
-        String token = String.valueOf(System.currentTimeMillis());
-        loggedInTokens.put(token, emp);
-        return token;
     }
 
-    //FUNCION: LOGOUT
-    public void logout(String token) {
-        loggedInTokens.remove(token);
+    // Logout: elimina token de sesión
+    public Optional<Boolean> logout(String token) {
+        if (tokenStore.containsKey(token)) {
+            tokenStore.remove(token);
+            return Optional.of(true);
+        } else {
+            return Optional.empty();
+        }
     }
 
+    // Obtener empleado a partir del token
     public Employee getEmployeeByToken(String token) {
-        return loggedInTokens.get(token);
+        return tokenStore.get(token);
     }
 
-    public boolean isLogged(String token) {
-        return loggedInTokens.containsKey(token);
+    // Método sincronizado para generar token único
+    private static synchronized String generateToken() {
+        return Long.toHexString(System.currentTimeMillis());
     }
 }
+

@@ -11,7 +11,6 @@ import es.deusto.sd.ecoembes.entity.Assignment;
 import es.deusto.sd.ecoembes.entity.Dumpster;
 import es.deusto.sd.ecoembes.entity.Employee;
 import es.deusto.sd.ecoembes.entity.RecyclingPlant;
-
 @Service
 public class AssignmentService {
 
@@ -21,18 +20,13 @@ public class AssignmentService {
     /**
      * Registra las asignaciones de un conjunto de dumpsters a un plant y empleado.
      */
-    
-    
-    //FUNCION: ASSIGN DUMPSTERS TO RECYCLING PLANT
     public void assignDumpstersToPlant(List<Dumpster> dumpsters, RecyclingPlant plant, Employee employee) {
         for (Dumpster dumpster : dumpsters) {
-            // Aquí puedes añadir lógica de capacidad si quieres
             Assignment newAssignment = new Assignment();
             newAssignment.setEmployee(employee);
             newAssignment.setRecyclingPlant(plant);
             newAssignment.setDumpsters(List.of(dumpster));
-            
-            // Añadir a la lista de assignments del dumpster
+
             dumpsterAssignments.compute(dumpster.getId(), (id, assignments) -> {
                 if (assignments == null) {
                     return List.of(newAssignment);
@@ -41,8 +35,7 @@ public class AssignmentService {
                     return assignments;
                 }
             });
-            
-            // También actualizar la lista de assignments en el dumpster
+
             List<Assignment> currentAssignments = dumpster.getAssignments();
             if (currentAssignments != null) {
                 currentAssignments.add(newAssignment);
@@ -77,5 +70,17 @@ public class AssignmentService {
                 .map(Assignment::getEmployee)
                 .distinct()
                 .toList();
+    }
+
+    /**
+     * NUEVO: Devuelve un empleado a partir de su ID
+     */
+    public Employee getEmployeeById(long employeeId) {
+        return dumpsterAssignments.values().stream()         // todas las listas de assignments
+                .flatMap(List::stream)                      // todas las assignments
+                .map(Assignment::getEmployee)               // todos los empleados
+                .filter(e -> e.getId() == employeeId)       // filtrar por id
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
     }
 }

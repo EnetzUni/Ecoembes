@@ -1,27 +1,35 @@
 package es.deusto.ingenieria.sd.Sockets;
 
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 public class ContSocketServer {
 
-    public static void main(String[] args) {
+    private static int numClients = 0;
+    
+    // Puerto compatible con tu cliente (asegúrate que en Spring Boot usas el 8081)
+    private static final int DEFAULT_PORT = 8081;
 
-        int port = 5000; // Debe coincidir con tu Ecoembes HOST/PORT
+    public static void main(String args[]) {
+        int serverPort = DEFAULT_PORT;
 
-        try (ServerSocket serverSocket = new ServerSocket(port)) {
+        if (args.length > 0) {
+            serverPort = Integer.parseInt(args[0]);
+        }
 
-            System.out.println("[ContServer] Running on port " + port);
+        try (ServerSocket tcpServerSocket = new ServerSocket(serverPort)) {
+            System.out.println("--- Servidor ContSocket Iniciado en puerto " + serverPort + " ---");
 
             while (true) {
-                Socket client = serverSocket.accept();
-                System.out.println("[ContServer] New connection");
-                new ContService(client);
+                // Espera conexión del cliente (tu Spring Boot)
+                Socket clientSocket = tcpServerSocket.accept();
+                // Lanza el hilo ContService que hemos modificado arriba
+                new ContService(clientSocket);
+                System.out.println(" - Nueva conexion aceptada. Cliente #" + (++numClients));
             }
-
-        } catch (Exception e) {
-            System.err.println("[ContServer] Fatal error: " + e.getMessage());
+        } catch (IOException e) {
+            System.err.println("# Error en el servidor: " + e.getMessage());
         }
     }
 }
-

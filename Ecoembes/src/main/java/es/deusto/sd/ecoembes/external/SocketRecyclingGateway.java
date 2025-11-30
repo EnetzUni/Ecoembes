@@ -1,54 +1,53 @@
-package es.deusto.sd.ecoembes.external;
+package external;
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.Socket;
-import java.util.Optional;
 
-import org.springframework.stereotype.Component;
-import com.fasterxml.jackson.databind.ObjectMapper;
+public class SocketRecyclingGateway implements ExternalGateway {
 
-@Component
-public class SocketRecyclingGateway implements IExternalRecyclingGateway {
+    private String serverIP;
+    private int serverPort;
+    private static final String DELIMITER = "#";
 
-    private final String HOST = "contsocketserver.com"; 
-    private final int PORT = 5000;
-
-    private final ObjectMapper mapper = new ObjectMapper();
-
-    private String sendAndReceive(String message) throws IOException {
-        try (Socket socket = new Socket(HOST, PORT);
-             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-             PrintWriter writer = new PrintWriter(socket.getOutputStream(), true)) {
-
-            writer.println(message);
-            return reader.readLine();
-        }
+    public SocketRecyclingGateway(String serverIP, int serverPort) {
+        this.serverIP = serverIP;
+        this.serverPort = serverPort;
     }
 
     @Override
-    public Optional<ExternalPlantInfo> getPlantInfo(long plantId) {
-        try {
-            String req = "GET_PLANT " + plantId;
-            String resp = sendAndReceive(req);
+    public ExternalAssignmentDTO getAssignmentInfo(String plantId) {
+        String request = "GET_ASSIGNMENT" + DELIMITER + plantId;
+        String response = null;
 
-            ExternalPlantInfo info = mapper.readValue(resp, ExternalPlantInfo.class);
-            return Optional.of(info);
+        try (Socket socket = new Socket(serverIP, serverPort);
+             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+             DataInputStream in = new DataInputStream(socket.getInputStream())) {
 
-        } catch (Exception e) {
-            return Optional.empty();
+            out.writeUTF(request);
+            System.out.println("Enviado: " + request);
+
+            response = in.readUTF();
+            System.out.println("Recibido: " + response);
+
+        } catch (IOException e) {
+            System.err.println("SocketRecyclingGateway ERROR: " + e.getMessage());
+            return null;
         }
-    }
 
-    @Override
-    public boolean sendAssignment(ExternalAssignmentDTO dto) {
-        try {
-            String json = mapper.writeValueAsString(dto);
-            String resp = sendAndReceive("SEND_ASSIGNMENT " + json);
+        // Ejemplo respuesta: OK#plantA#45.2#YES
+        String[] parts = response.split(DELIMITER);
 
-            return "OK".equals(resp);
-
-        } catch (Exception e) {
-            return false;
+        if (!parts[0].equals("OK")) {
+            return null;
         }
+
+        ExternalAssignmentDTO dto = new ExternalAssignmentDTO();
+        dto.setPlantId(parts[1]);
+        dto.setWeight(Double.parseDouble(parts[2]));
+        dto.setAccepted(Boolean.parseBoolean(parts[3]));
+
+        return dto;
     }
 }

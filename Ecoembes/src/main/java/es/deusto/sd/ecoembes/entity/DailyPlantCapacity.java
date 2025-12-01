@@ -3,30 +3,11 @@ package es.deusto.sd.ecoembes.entity;
 import java.util.Date;
 import java.util.Objects;
 
-import jakarta.persistence.Entity; // Importante
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne; // Importante
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
-
-@Entity // Faltaba esto
 public class DailyPlantCapacity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
-    @Temporal(TemporalType.TIMESTAMP)
     private Date date;
-
     private float capacity;
-
-    // Relación Muchos a Uno: Muchas capacidades (días) pertenecen a una Planta
-    @ManyToOne
-    @JoinColumn(name = "recycling_plant_id") 
     private RecyclingPlant recyclingPlant;
 
     // ------------ //

@@ -27,9 +27,9 @@ public class Dumpster {
         this.maxCapacity = maxCapacity;
     }
 
-    // ---------- //
-    // Getters & Setters
-    // ---------- //
+    // ----------------- //
+    // Getters & Setters //
+    // ----------------- //
 
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }

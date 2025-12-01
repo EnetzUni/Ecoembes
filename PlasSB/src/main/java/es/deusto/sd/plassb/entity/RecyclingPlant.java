@@ -38,8 +38,10 @@ public class RecyclingPlant {
     // ----------------- //
     // Getters & Setters //
     // ----------------- //
+ 
     
-    public long getId() { return id; }
+
+     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
 
     public String getName() { return name; }
@@ -75,3 +77,5 @@ public class RecyclingPlant {
         return "RecyclingPlant [id=" + id + ", name=" + name + ", location=" + location + "]";
     }
 }
+
+

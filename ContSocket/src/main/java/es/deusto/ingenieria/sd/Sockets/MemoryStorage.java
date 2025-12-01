@@ -1,23 +1,37 @@
 package es.deusto.ingenieria.sd.Sockets;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 public class MemoryStorage {
 
-    private static final Map<Long, ExternalPlantInfo> plants = new HashMap<>();
-    private static final Map<Long, ExternalAssignmentDTO> assignments = new HashMap<>();
+    // Map<plantId, Map<date, CapacityResponseDTO>>
+    private static final Map<Long, Map<Date, CapacityResponseDTO>> dailyCapacities = new HashMap<>();
 
     static {
-        plants.put(1L, new ExternalPlantInfo(1, "Plant Alpha", "Madrid", 5000));
-        plants.put(2L, new ExternalPlantInfo(2, "Plant Beta", "Bilbao", 3000));
+        // Inicializamos con algunas plantas y capacidades de ejemplo
+        Date today = new Date();
+        CapacityResponseDTO plant1 = new CapacityResponseDTO(1L, 5000f, today);
+        CapacityResponseDTO plant2 = new CapacityResponseDTO(2L, 3000f, today);
+
+        Map<Date, CapacityResponseDTO> map1 = new HashMap<>();
+        map1.put(today, plant1);
+        dailyCapacities.put(1L, map1);
+
+        Map<Date, CapacityResponseDTO> map2 = new HashMap<>();
+        map2.put(today, plant2);
+        dailyCapacities.put(2L, map2);
     }
 
-    public static ExternalPlantInfo getPlant(long id) {
-        return plants.get(id);
+    public static CapacityResponseDTO getCapacity(long plantId, Date date) {
+        Map<Date, CapacityResponseDTO> plantCapacities = dailyCapacities.get(plantId);
+        if (plantCapacities == null) return null;
+        return plantCapacities.get(date);
     }
 
-    public static void saveAssignment(ExternalAssignmentDTO dto) {
-        assignments.put(dto.getAssignmentId(), dto);
+    public static void saveCapacity(CapacityResponseDTO capacity) {
+        dailyCapacities.computeIfAbsent(capacity.getPlantId(), k -> new HashMap<>())
+                .put(capacity.getDate(), capacity);
     }
 }

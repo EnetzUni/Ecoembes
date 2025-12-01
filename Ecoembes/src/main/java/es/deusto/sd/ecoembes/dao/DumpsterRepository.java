@@ -9,6 +9,5 @@ import java.util.List;
 
 @Repository
 public interface DumpsterRepository extends JpaRepository<Dumpster, Long> {
-    List<Dumpster> findByLocationContainingAndLastUpdate(String postalCode, Date date);
-    List<Dumpster> findByIdAndLastUpdateBetween(long id, Date start, Date end);
+    
 }

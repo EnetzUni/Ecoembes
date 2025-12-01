@@ -20,7 +20,6 @@ public class RecyclingPlant {
     private String name;
     private String location;
 
-    // Histórico de capacidades diarias
     @OneToMany(mappedBy = "recyclingPlant", cascade = CascadeType.ALL)
     private List<DailyPlantCapacity> dailyCapacities;
 

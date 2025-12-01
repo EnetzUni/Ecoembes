@@ -28,9 +28,6 @@ public class Assignment {
     @ManyToOne(optional = false)
     private Employee employee;
 
-    @ManyToOne(optional = false)
-    private Dumpster dumpster;
-
     @ManyToMany
     @JoinTable(
         name = "assignment_dumpster",

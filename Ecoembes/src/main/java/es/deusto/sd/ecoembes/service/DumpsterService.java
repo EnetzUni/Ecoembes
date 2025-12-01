@@ -1,4 +1,4 @@
-package es.deusto.sd.ecoembes.service;
+/*package es.deusto.sd.ecoembes.service;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -93,3 +93,4 @@ public class DumpsterService {
     }
 }
 
+*/

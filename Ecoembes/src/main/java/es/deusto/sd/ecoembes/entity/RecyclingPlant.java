@@ -3,25 +3,12 @@ package es.deusto.sd.ecoembes.entity;
 import java.util.List;
 import java.util.Objects;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-
-@Entity
 public class RecyclingPlant {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
     private String name;
     private String location;
 
-    // Histórico de capacidades diarias
-    @OneToMany(mappedBy = "recyclingPlant", cascade = CascadeType.ALL)
     private List<DailyPlantCapacity> dailyCapacities;
 
     // ------------ //

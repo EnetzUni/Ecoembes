@@ -26,7 +26,7 @@ public class DailyPlantCapacityService {
     }
 
     public Optional<Float> getCapacityByPlantAndDate(long plantId, Date date) {
-        Optional<DailyPlantCapacity> capacity = repository.findByRecyclingPlantIdAndDate(plantId, date);
-        return capacity.map(DailyPlantCapacity::getCapacity);
+        return repository.findByRecyclingPlantIdAndDate(plantId, date)
+                         .map(DailyPlantCapacity::getCapacity);
     }
 }

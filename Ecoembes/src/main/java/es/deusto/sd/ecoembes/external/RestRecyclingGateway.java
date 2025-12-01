@@ -9,32 +9,43 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import es.deusto.sd.ecoembes.dto.CapacityRequestDTO;
+import es.deusto.sd.ecoembes.dto.CapacityResponseDTO;
+
 @Component
 public class RestRecyclingGateway {
 
     private final ObjectMapper mapper = new ObjectMapper();
     private final HttpClient client = HttpClient.newHttpClient();
-    private final String BASE_URL = "http://localhost:8081/api";
+    private final String BASE_URL = "http://localhost:8081/api/capacity";
 
-    /**
-     * Calls PlasSB endpoint:
-     * GET /api/capacity?plantId=X&date=YYYY-MM-DD
-     */
     public Optional<Float> getDailyCapacity(long plantId, String dateIso) {
         try {
-            String url = BASE_URL + "/capacity?plantId=" + plantId + "&date=" + dateIso;
+            // Create request DTO
+            CapacityRequestDTO requestDto = new CapacityRequestDTO(plantId, java.sql.Date.valueOf(dateIso));
 
+            // Convert to JSON
+            String jsonRequest = mapper.writeValueAsString(requestDto);
+
+            // Build POST request
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .GET()
+                    .uri(URI.create(BASE_URL))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonRequest))
                     .build();
 
-            String body = client.send(request, HttpResponse.BodyHandlers.ofString()).body();
+            // Send request
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            // because the controller returns a JSON number, mapper reads it as Float
-            Float capacity = mapper.readValue(body, Float.class);
+            if (response.statusCode() != 200) {
+                return Optional.empty();
+            }
 
-            return Optional.ofNullable(capacity);
+            // Parse response JSON into CapacityResponseDTO
+            CapacityResponseDTO responseDto = mapper.readValue(response.body(), CapacityResponseDTO.class);
+
+            // Return capacity
+            return Optional.of(responseDto.getCapacity());
 
         } catch (Exception e) {
             return Optional.empty();

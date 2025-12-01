@@ -10,6 +10,5 @@ import java.util.Optional;
 @Repository
 public interface DailyPlantCapacityRepository extends JpaRepository<DailyPlantCapacity, Long> {
 
-    // Custom query method
     Optional<DailyPlantCapacity> findByRecyclingPlantIdAndDate(long recyclingPlantId, Date date);
 }

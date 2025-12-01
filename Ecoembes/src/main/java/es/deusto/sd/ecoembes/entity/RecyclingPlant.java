@@ -2,7 +2,6 @@
 
     import java.util.List;
     import java.util.Objects;
-    import es.deusto.sd.ecoembes.entity.DailyPlantCapacity;
     import jakarta.persistence.Entity;
 
     

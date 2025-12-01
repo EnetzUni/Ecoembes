@@ -28,11 +28,6 @@ public class Assignment {
     @ManyToOne(optional = false)
     private Employee employee;
 
-    // CORRECCIÓN: Añadida la relación con RecyclingPlant (Muchas rutas van a una planta)
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "recycling_plant_id")
-    private RecyclingPlant recyclingPlant;
-
     @ManyToMany
     @JoinTable(
         name = "assignment_dumpster",
@@ -47,12 +42,12 @@ public class Assignment {
 
     public Assignment() {}
 
-    public Assignment(Date date, Employee employee, RecyclingPlant recyclingPlant, List<Dumpster> dumpsters) {
-        this.date = date;
-        this.employee = employee;
-        this.recyclingPlant = recyclingPlant;
-        this.dumpsters = dumpsters;
-    }
+    public Assignment(Date date, Employee employee, List<Dumpster> dumpsters) {
+    this.date = date;
+    this.employee = employee;
+    this.dumpsters = dumpsters;
+}
+
 
     // ----------------- //
     // Getters & Setters //
@@ -65,9 +60,6 @@ public class Assignment {
 
     public Employee getEmployee() { return employee; }
     public void setEmployee(Employee employee) { this.employee = employee; }
-
-    public RecyclingPlant getRecyclingPlant() { return recyclingPlant; }
-    public void setRecyclingPlant(RecyclingPlant recyclingPlant) { this.recyclingPlant = recyclingPlant; }
 
     public List<Dumpster> getDumpsters() { return dumpsters; }
     public void setDumpsters(List<Dumpster> dumpsters) { this.dumpsters = dumpsters; }
@@ -86,8 +78,12 @@ public class Assignment {
         return id == ((Assignment) obj).id;
     }
 
+    // -------- //
+    // toString //
+    // -------- //
+
     @Override
     public String toString() {
-        return "Assignment [id=" + id + ", date=" + date + ", plant=" + (recyclingPlant != null ? recyclingPlant.getName() : "null") + "]";
+        return "Assignment [id=" + id + ", date=" + date + ", employee=" + employee + ", dumpsters=" + dumpsters + "]";
     }
 }

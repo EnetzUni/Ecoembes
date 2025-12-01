@@ -12,7 +12,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import es.deusto.sd.ecoembes.dto.CapacityRequestDTO;
 import es.deusto.sd.ecoembes.dto.CapacityResponseDTO;
+import org.springframework.stereotype.Component; // <--- IMPORTANTE
 
+@Component // <--- ESTO ES LO QUE TE FALTA
 public class SocketRecyclingGateway implements IExternalRecyclingGateway {
 
     private final String serverIP;

@@ -1,15 +1,9 @@
 package es.deusto.sd.ecoembes.entity;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
 
 @Entity
 public class Dumpster {
@@ -21,11 +15,6 @@ public class Dumpster {
     private String location;
 
     private float maxCapacity;
-
-    // Relación con el historial de llenado
-    // 'mappedBy' asume que en FillLevelRecord hay un campo "private Dumpster dumpster;"
-    @OneToMany(mappedBy = "dumpster", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<FillLevelRecord> fillHistory = new ArrayList<>();
 
     // ---------- //
     // Constructores
@@ -51,17 +40,8 @@ public class Dumpster {
     public float getMaxCapacity() { return maxCapacity; }
     public void setMaxCapacity(float maxCapacity) { this.maxCapacity = maxCapacity; }
 
-    public List<FillLevelRecord> getFillHistory() { return fillHistory; }
-    public void setFillHistory(List<FillLevelRecord> fillHistory) { this.fillHistory = fillHistory; }
-
     @Override
     public String toString() {
         return "Dumpster [id=" + id + ", location=" + location + ", maxCapacity=" + maxCapacity + "]";
     }
-
-    @ManyToMany(mappedBy = "dumpsters")
-    private List<Assignment> assignments = new ArrayList<>();
-
-    public List<Assignment> getAssignments() { return assignments; }
-    public void setAssignments(List<Assignment> assignments) { this.assignments = assignments; }
 }

@@ -26,24 +26,21 @@ public class Dumpster {
 
     private float maxCapacity;
 
-    // Último fill level registrado
     private float fillLevel;
 
-    // Fecha de la última actualización
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastUpdate;
 
-    // Histórico de registros de fill level
     @OneToMany(mappedBy = "dumpster", cascade = CascadeType.ALL)
     private List<FillLevelRecord> fillHistory = new ArrayList<>();
 
-    // Asignaciones en las que ha participado este dumpster
     @ManyToMany(mappedBy = "dumpsters")
     private List<Assignment> assignments;
 
-    // -----------------------
-    // Constructores
-    // -----------------------
+    // ------------ //
+    // Constructors //
+    // ------------ //
+
     public Dumpster() {}
 
     public Dumpster(String location, float maxCapacity) {
@@ -51,68 +48,35 @@ public class Dumpster {
         this.maxCapacity = maxCapacity;
     }
 
-    // -----------------------
-    // Getters y Setters
-    // -----------------------
-    public long getId() {
-        return id;
-    }
+    // ----------------- //
+    // Getters & Setters //
+    // ----------------- //
 
-    public void setId(long id) {
-        this.id = id;
-    }
+    public long getId() { return id; }
+    public void setId(long id) { this.id = id; }
 
-    public String getLocation() {
-        return location;
-    }
+    public String getLocation() { return location; }
+    public void setLocation(String location) { this.location = location; }
 
-    public void setLocation(String location) {
-        this.location = location;
-    }
+    public float getMaxCapacity() { return maxCapacity; }
+    public void setMaxCapacity(float maxCapacity) { this.maxCapacity = maxCapacity; }
 
-    public float getMaxCapacity() {
-        return maxCapacity;
-    }
+    public float getFillLevel() { return fillLevel; }
+    public void setFillLevel(float fillLevel) { this.fillLevel = fillLevel; }
 
-    public void setMaxCapacity(float maxCapacity) {
-        this.maxCapacity = maxCapacity;
-    }
+    public Date getLastUpdate() { return lastUpdate; }
+    public void setLastUpdate(Date lastUpdate) { this.lastUpdate = lastUpdate; }
 
-    public float getFillLevel() {
-        return fillLevel;
-    }
+    public List<FillLevelRecord> getFillHistory() { return fillHistory; }
+    public void setFillHistory(List<FillLevelRecord> fillHistory) { this.fillHistory = fillHistory; }
 
-    public void setFillLevel(float fillLevel) {
-        this.fillLevel = fillLevel;
-    }
+    public List<Assignment> getAssignments() { return assignments; }
+    public void setAssignments(List<Assignment> assignments) { this.assignments = assignments; }
 
-    public Date getLastUpdate() {
-        return lastUpdate;
-    }
+    // ----------------- //
+    // hashCode & Equals //
+    // ----------------- //
 
-    public void setLastUpdate(Date lastUpdate) {
-        this.lastUpdate = lastUpdate;
-    }
-
-    public List<FillLevelRecord> getFillHistory() {
-        return fillHistory;
-    }
-
-    public void setFillHistory(List<FillLevelRecord> fillHistory) {
-        this.fillHistory = fillHistory;
-    }
-
-    public List<Assignment> getAssignments() {
-        return assignments;
-    }
-
-    public void setAssignments(List<Assignment> assignments) {
-        this.assignments = assignments;
-    }
-
-    // -----------------------
-    // hashCode y equals
-    // -----------------------
     @Override
     public int hashCode() {
         return Objects.hash(id);
@@ -125,9 +89,10 @@ public class Dumpster {
         return id == ((Dumpster) obj).id;
     }
 
-    // -----------------------
-    // toString
-    // -----------------------
+    // -------- //
+    // toString //
+    // -------- //
+
     @Override
     public String toString() {
         return "Dumpster [id=" + id + ", location=" + location + ", maxCapacity=" + maxCapacity

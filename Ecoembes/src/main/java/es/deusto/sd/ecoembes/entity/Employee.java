@@ -24,8 +24,11 @@ public class Employee {
     @Column(nullable = false)
     private String password;
 
-    public Employee() {
-    }
+    // ------------ //
+    // Constructors //
+    // ------------ //
+
+    public Employee() {}
 
     public Employee(String name, String email, String password) {
         this.name = name;
@@ -33,42 +36,27 @@ public class Employee {
         this.password = password;
     }
 
-    public long getId() {
-        return id;
-    }
+    // ----------------- //
+    // Getters & Setters //
+    // ----------------- //
 
-    public void setId(long id) {
-        this.id = id;
-    }
+    public long getId() { return id; }
+    public void setId(long id) { this.id = id; }
 
-    public String getName() {
-        return name;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public String getEmail() {
-        return email;
-    }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    public boolean checkPassword(String passwordToCheck) { return this.password.equals(passwordToCheck); }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-    
-    public boolean checkPassword(String passwordToCheck) {
-        return this.password.equals(passwordToCheck);
-    }
-
+    // ----------------- //
+    // hashCode & Equals //
+    // ----------------- //
 
     @Override
     public int hashCode() {
@@ -77,15 +65,14 @@ public class Employee {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Employee other = (Employee) obj;
-        return id == other.id;
+        if (this == obj) return true;
+        if (!(obj instanceof Employee)) return false;
+        return id == ((Employee) obj).id;
     }
+
+    // -------- //
+    // toString //
+    // -------- //
 
     @Override
     public String toString() {

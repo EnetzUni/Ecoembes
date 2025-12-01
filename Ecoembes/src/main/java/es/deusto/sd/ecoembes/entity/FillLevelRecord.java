@@ -3,24 +3,34 @@ package es.deusto.sd.ecoembes.entity;
 import java.util.Date;
 import java.util.Objects;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 @Entity
-public class FillLevelRecord {  
-	//eso para usar tipo historial, que como la funcion query dumspter usage filtra entre una fecha de inicio
-	//y una de fin, pues para q sea mas facil y todo eso. si lo veis y creeis q no hace falta, lo quitamos o lo 
-	//hacemos d otra manera
-	
+public class FillLevelRecord {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
+    @Temporal(TemporalType.DATE)
     private Date date;
+
     private float fillLevel;
 
-
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "dumpster_id")
     private Dumpster dumpster;
+
+    // ------------ //
+    // Constructors //
+    // ------------ //
 
     public FillLevelRecord() {}
 
@@ -30,41 +40,27 @@ public class FillLevelRecord {
         this.dumpster = dumpster;
     }
 
-    
+    // ----------------- //
+    // Getters & Setters //
+    // ----------------- //
 
-    public long getId() {
-		return id;
-	}
+    public long getId() { return id; }
+    public void setId(long id) { this.id = id; }
 
-	public void setId(long id) {
-		this.id = id;
-	}
+    public Date getDate() { return date; }
+    public void setDate(Date date) { this.date = date; }
 
-	public Date getDate() {
-		return date;
-	}
+    public float getFillLevel() { return fillLevel; }
+    public void setFillLevel(float fillLevel) { this.fillLevel = fillLevel; }
 
-	public void setDate(Date date) {
-		this.date = date;
-	}
+    public Dumpster getDumpster() { return dumpster; }
+    public void setDumpster(Dumpster dumpster) { this.dumpster = dumpster; }
 
-	public float getFillLevel() {
-		return fillLevel;
-	}
+    // ----------------- //
+    // hashCode & Equals //
+    // ----------------- //
 
-	public void setFillLevel(float fillLevel) {
-		this.fillLevel = fillLevel;
-	}
-
-	public Dumpster getDumpster() {
-		return dumpster;
-	}
-
-	public void setDumpster(Dumpster dumpster) {
-		this.dumpster = dumpster;
-	}
-
-	@Override
+    @Override
     public int hashCode() {
         return Objects.hash(id);
     }
@@ -74,5 +70,14 @@ public class FillLevelRecord {
         if (this == obj) return true;
         if (!(obj instanceof FillLevelRecord)) return false;
         return id == ((FillLevelRecord) obj).id;
+    }
+
+    // -------- //
+    // toString //
+    // -------- //
+
+    @Override
+    public String toString() {
+        return "FillLevelRecord [id=" + id + ", date=" + date + ", fillLevel=" + fillLevel + "]";
     }
 }

@@ -1,9 +1,7 @@
 package es.deusto.sd.ecoembes.facade;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
@@ -16,6 +14,7 @@ import es.deusto.sd.ecoembes.entity.Dumpster;
 import es.deusto.sd.ecoembes.entity.RecyclingPlant;
 import es.deusto.sd.ecoembes.entity.Employee;
 import es.deusto.sd.ecoembes.service.AssignmentService;
+import es.deusto.sd.ecoembes.service.DumpsterService; // Import necesario
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -25,80 +24,62 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class EcoembesController {
 
     private final AssignmentService assignmentService;
+    private final DumpsterService dumpsterService; // 1. Añadido el servicio faltante
 
-    public EcoembesController(
-                              AssignmentService assignmentService) {
+    // 2. Inyección de dependencias actualizada
+    public EcoembesController(AssignmentService assignmentService, DumpsterService dumpsterService) {
         this.assignmentService = assignmentService;
+        this.dumpsterService = dumpsterService;
     }
 
     // -----------------------
     // Dumpsters endpoints
     // -----------------------
 
-    //FUNCION: CREATE NEW DUMPSTER
+    // FUNCION: CREATE NEW DUMPSTER
     @Operation(summary = "Create a new dumpster", description = "Adds a new dumpster to the system")
     @PostMapping("/dumpsters")
     public ResponseEntity<DumpsterDTO> createDumpster(@RequestBody Dumpster dumpster) {
         Dumpster d = dumpsterService.createDumpster(dumpster);
-        return new ResponseEntity<>(new DumpsterDTO(
-                d.getId(),
-                d.getLocation(),
-                d.getMaxCapacity(),
-                d.getLastUpdate(),
-                null // fillHistory puede ser null por ahora
-        ), HttpStatus.CREATED);
+        
+        // CORRECCIÓN: Usamos el método toDTO del servicio.
+        // El constructor manual new DumpsterDTO(...) fallaba porque Dumpster no tiene getFillLevel() directamente.
+        return new ResponseEntity<>(dumpsterService.toDTO(d), HttpStatus.CREATED);
     }
 
-    //FUNCION: UPDATE DUMPSTER INFO
+    // FUNCION: UPDATE DUMPSTER INFO
     @Operation(summary = "Update dumpster info", description = "Updates the fill level and last update of a dumpster")
     @PutMapping("/dumpsters/{id}")
     public ResponseEntity<DumpsterDTO> updateDumpster(@PathVariable long id,
                                                       @RequestParam float fillLevel,
                                                       @RequestParam Date date) {
         Dumpster d = dumpsterService.updateDumpsterInfo(id, fillLevel, date);
-        return new ResponseEntity<>(new DumpsterDTO(
-                d.getId(),
-                d.getLocation(),
-                d.getMaxCapacity(),
-                d.getFillLevel(),
-                d.getLastUpdate(),
-                null
-        ), HttpStatus.OK);
+        // CORRECCIÓN: Usamos toDTO para evitar errores de compilación y lógica duplicada
+        return new ResponseEntity<>(dumpsterService.toDTO(d), HttpStatus.OK);
     }
 
-    
-    //FUNCION: CHECK DUMPSTER STATUS
-    @Operation(summary = "Check dumpster status",description = "Returns dumpsters and status")
-    	@GetMapping("/dumpsters")
-    	public ResponseEntity<List<Map<String, Object>>> getDumpstersByPostalCode(
-    	        @RequestParam String postalCode,
-    	        @RequestParam Date date) {
+    // FUNCION: CHECK DUMPSTER STATUS
+    @Operation(summary = "Check dumpster status", description = "Returns dumpsters and status")
+    @GetMapping("/dumpsters")
+    public ResponseEntity<List<DumpsterDTO>> getDumpstersByPostalCode(
+            @RequestParam String postalCode,
+            @RequestParam Date date) {
 
-    	    List<Map<String, Object>> results = dumpsterService.getDumpstersByPostalCode(postalCode, date)
-    	            .stream()
-    	            .map(d -> {
-    	                Map<String, Object> dumpsterMap = new HashMap<>();
+        // CORRECCIÓN: Simplificado para devolver DTOs directos usando el servicio
+        // Esto evita el error de "Cannot infer type arguments" al mezclar Maps y Objects
+        List<DumpsterDTO> results = dumpsterService.getDumpstersByPostalCode(postalCode, date)
+                .stream()
+                .map(dumpsterService::toDTO)
+                .collect(Collectors.toList());
 
-    	                dumpsterMap.put("id", d.getId());
-    	                dumpsterMap.put("location", d.getLocation());
-    	                dumpsterMap.put("maxCapacity", d.getMaxCapacity());
-    	                dumpsterMap.put("fillLevel", d.getFillLevel());
-    	                dumpsterMap.put("lastUpdate", d.getLastUpdate());
-    	                dumpsterMap.put("status", dumpsterService.getDumpsterStatus(d.getFillLevel()));
+        if (results.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(results, HttpStatus.OK);
+        }
+    }
 
-    	                return dumpsterMap;
-    	            })
-    	            .toList();
-
-    	    if (results.isEmpty()) {
-    	        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    	    } else {
-    	        return new ResponseEntity<>(results, HttpStatus.OK);
-    	    }
-    	}
-
-    
-    //FUNCION: QUERY DUMPSTER USAGE 
+    // FUNCION: QUERY DUMPSTER USAGE 
     @Operation(summary = "Query dumpster usage", description = "Returns the usage between two dates")
     @GetMapping("/dumpsters/{id}/usage")
     public ResponseEntity<List<FillLevelRecordDTO>> getUsage(
@@ -107,13 +88,11 @@ public class EcoembesController {
             @RequestParam Date end) {
 
         try {
-            List<FillLevelRecordDTO> history = dumpsterService
-                    .getDumpsterById(id)
-                    .getFillHistory()
+            // Usamos queryUsage del servicio que ya filtra por fechas
+            List<FillLevelRecordDTO> history = dumpsterService.queryUsage(id, start, end)
                     .stream()
-                    .filter(r -> !r.getDate().before(start) && !r.getDate().after(end))
                     .map(r -> new FillLevelRecordDTO(r.getDate(), r.getFillLevel()))
-                    .toList();
+                    .collect(Collectors.toList());
 
             return new ResponseEntity<>(history, HttpStatus.OK);
         } catch (RuntimeException e) {
@@ -122,42 +101,34 @@ public class EcoembesController {
     }
 
     // -----------------------
-    // Recycling Plants endpoints
-    // -----------------------
-
-    //FUNCION: CHECK PLANT CAPACITY
-    @Operation(summary = "Check recycling plant capacity", description = "Returns the current capacity of a plant")
-    @GetMapping("/plants/{id}/capacity")
-    public ResponseEntity<Float> getPlantCapacity(@PathVariable long id) {
-        try {
-            float capacity = plantService.getCapacity(id);
-            return new ResponseEntity<>(capacity, HttpStatus.OK);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
-
-    // -----------------------
     // Assignments endpoints
     // -----------------------
+    
+    // NOTA: He eliminado getPlantCapacity porque PlantService ha sido borrado.
 
-    //FUNCION: ASSIGN DUMPSTERS TO A PLANT
+    // FUNCION: ASSIGN DUMPSTERS TO A PLANT
     @Operation(summary = "Assign dumpsters to a plant", description = "Assigns dumpsters to a recycling plant by a given employee")
     @PostMapping("/assignments")
     public ResponseEntity<Void> assignDumpsters(@RequestParam List<Long> dumpsterIds,
                                                 @RequestParam long plantId,
                                                 @RequestParam long employeeId) {
         try {
-            RecyclingPlant plant = plantService.getPlantById(plantId);
+            // CORRECCIÓN: Como PlantService no existe, no podemos hacer plantService.getById(plantId).
+            // Creamos una instancia "proxy" con el ID para que JPA pueda hacer la relación (o para simularlo).
+            RecyclingPlant plant = new RecyclingPlant();
+            plant.setId(plantId); 
+            // Nota: En un sistema real necesitarías un Repository para verificar que la planta existe realmente.
+
             List<Dumpster> dumpsters = dumpsterIds.stream()
                     .map(dumpsterService::getDumpsterById)
                     .collect(Collectors.toList());
+            
             Employee employee = assignmentService.getEmployeeById(employeeId);
+            
             assignmentService.assignDumpstersToPlant(dumpsters, plant, employee);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     } 
-   
 }

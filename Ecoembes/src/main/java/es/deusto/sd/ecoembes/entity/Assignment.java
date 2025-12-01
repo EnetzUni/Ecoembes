@@ -42,11 +42,12 @@ public class Assignment {
 
     public Assignment() {}
 
-    public Assignment(Date date, Employee employee, Dumpster dumpster) {
-        this.date = date;
-        this.employee = employee;
-        this.dumpster = dumpster;
-    }
+    public Assignment(Date date, Employee employee, List<Dumpster> dumpsters) {
+    this.date = date;
+    this.employee = employee;
+    this.dumpsters = dumpsters;
+}
+
 
     // ----------------- //
     // Getters & Setters //
@@ -59,9 +60,6 @@ public class Assignment {
 
     public Employee getEmployee() { return employee; }
     public void setEmployee(Employee employee) { this.employee = employee; }
-
-    public Dumpster getDumpster() { return dumpster; }
-    public void setDumpster(Dumpster dumpster) { this.dumpster = dumpster; }
 
     public List<Dumpster> getDumpsters() { return dumpsters; }
     public void setDumpsters(List<Dumpster> dumpsters) { this.dumpsters = dumpsters; }
@@ -86,7 +84,6 @@ public class Assignment {
 
     @Override
     public String toString() {
-        return "Assignment [id=" + id + ", date=" + date + ", employee=" + employee 
-                + ", dumpster=" + dumpster + "]";
+        return "Assignment [id=" + id + ", date=" + date + ", employee=" + employee + ", dumpsters=" + dumpsters + "]";
     }
 }

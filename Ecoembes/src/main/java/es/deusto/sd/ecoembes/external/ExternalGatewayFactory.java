@@ -15,7 +15,7 @@ public class ExternalGatewayFactory {
     }
 
     public IExternalRecyclingGateway getGateway(ExternalGatewayType type) {
-        return switch(type) {
+        return switch (type) {
             case REST -> restGateway;
             case SOCKET -> socketGateway;
         };

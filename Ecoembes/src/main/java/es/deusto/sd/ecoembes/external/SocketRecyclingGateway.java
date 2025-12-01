@@ -11,10 +11,10 @@ import java.util.Optional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import es.deusto.sd.plassb.dto.CapacityRequestDTO;
-import es.deusto.sd.plassb.dto.CapacityResponseDTO;
+import es.deusto.sd.ecoembes.dto.CapacityRequestDTO;
+import es.deusto.sd.ecoembes.dto.CapacityResponseDTO;
 
-public class SocketRecyclingGateway {
+public class SocketRecyclingGateway implements IExternalRecyclingGateway {
 
     private final String serverIP;
     private final int serverPort;
@@ -26,40 +26,21 @@ public class SocketRecyclingGateway {
     }
 
     // -----------------------------
-    // Enviar capacidad al servidor
+    // Implementación de la interfaz
     // -----------------------------
-    public boolean sendCapacity(CapacityResponseDTO dto) {
+    @Override
+    public Optional<Float> getCapacity(CapacityRequestDTO request) {
         try (Socket socket = new Socket(serverIP, serverPort);
              DataOutputStream out = new DataOutputStream(socket.getOutputStream());
              DataInputStream in = new DataInputStream(socket.getInputStream())) {
 
-            // Convertimos DTO a JSON y enviamos con prefijo SEND#
-            String json = mapper.writeValueAsString(dto);
-            out.writeUTF("SEND#" + json);
+            // Convertimos la fecha a LocalDate (yyyy-MM-dd)
+            LocalDate localDate = request.getDate().toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate();
 
-            // Leemos respuesta
-            String response = in.readUTF();
-            return "OK".equalsIgnoreCase(response);
-
-        } catch (IOException e) {
-            System.err.println("Socket ERROR sendCapacity: " + e.getMessage());
-            return false;
-        }
-    }
-
-    // -----------------------------
-    // Consultar capacidad del servidor
-    // -----------------------------
-    public Optional<CapacityResponseDTO> getCapacity(long plantId, Date date) {
-        try (Socket socket = new Socket(serverIP, serverPort);
-             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-             DataInputStream in = new DataInputStream(socket.getInputStream())) {
-
-            // Convertimos Date a LocalDate para el formato yyyy-MM-dd
-            LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-
-            // Enviamos GET#plantId#fecha
-            out.writeUTF("GET#" + plantId + "#" + localDate.toString());
+            // Enviamos la consulta al servidor de sockets
+            out.writeUTF("GET#" + request.getPlantId() + "#" + localDate.toString());
 
             // Leemos respuesta
             String response = in.readUTF();
@@ -68,13 +49,34 @@ public class SocketRecyclingGateway {
                 return Optional.empty();
             }
 
-            // Convertimos JSON a DTO
+            // Convertimos JSON a CapacityResponseDTO
             CapacityResponseDTO dto = mapper.readValue(response, CapacityResponseDTO.class);
-            return Optional.of(dto);
+
+            return Optional.of(dto.getCapacity());
 
         } catch (IOException e) {
             System.err.println("Socket ERROR getCapacity: " + e.getMessage());
             return Optional.empty();
+        }
+    }
+
+    // -----------------------------
+    // Método opcional para enviar capacidad
+    // -----------------------------
+    public boolean sendCapacity(CapacityResponseDTO dto) {
+        try (Socket socket = new Socket(serverIP, serverPort);
+             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+             DataInputStream in = new DataInputStream(socket.getInputStream())) {
+
+            String json = mapper.writeValueAsString(dto);
+            out.writeUTF("SEND#" + json);
+
+            String response = in.readUTF();
+            return "OK".equalsIgnoreCase(response);
+
+        } catch (IOException e) {
+            System.err.println("Socket ERROR sendCapacity: " + e.getMessage());
+            return false;
         }
     }
 }

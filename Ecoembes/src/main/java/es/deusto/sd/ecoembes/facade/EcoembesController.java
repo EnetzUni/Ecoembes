@@ -15,8 +15,6 @@ import es.deusto.sd.ecoembes.dto.FillLevelRecordDTO;
 import es.deusto.sd.ecoembes.entity.Dumpster;
 import es.deusto.sd.ecoembes.entity.RecyclingPlant;
 import es.deusto.sd.ecoembes.entity.Employee;
-import es.deusto.sd.ecoembes.service.DumpsterService;
-import es.deusto.sd.ecoembes.service.RecyclingPlantService;
 import es.deusto.sd.ecoembes.service.AssignmentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,15 +24,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Ecoembes Controller", description = "Operations related to dumpsters, recycling plants, and assignments")
 public class EcoembesController {
 
-    private final DumpsterService dumpsterService;
-    private final RecyclingPlantService plantService;
     private final AssignmentService assignmentService;
 
-    public EcoembesController(DumpsterService dumpsterService,
-                              RecyclingPlantService plantService,
+    public EcoembesController(
                               AssignmentService assignmentService) {
-        this.dumpsterService = dumpsterService;
-        this.plantService = plantService;
         this.assignmentService = assignmentService;
     }
 

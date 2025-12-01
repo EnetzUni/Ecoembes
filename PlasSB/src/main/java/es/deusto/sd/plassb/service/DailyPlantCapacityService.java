@@ -1,7 +1,8 @@
 package es.deusto.sd.plassb.service;
 
+import es.deusto.sd.plassb.dao.DailyPlantCapacityRepository;
 import es.deusto.sd.plassb.entity.DailyPlantCapacity;
-import es.deusto.sd.plassb.repository.DailyPlantCapacityRepository;
+
 import org.springframework.stereotype.Service;
 
 import java.util.Date;

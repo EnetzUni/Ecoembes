@@ -1,7 +1,8 @@
 package es.deusto.sd.plassb.service;
 
+import es.deusto.sd.plassb.dao.RecyclingPlantRepository;
 import es.deusto.sd.plassb.entity.RecyclingPlant;
-import es.deusto.sd.plassb.repository.RecyclingPlantRepository;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;

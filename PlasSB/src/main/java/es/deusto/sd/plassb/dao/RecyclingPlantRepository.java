@@ -1,4 +1,4 @@
-package es.deusto.sd.plassb.repository;
+package es.deusto.sd.plassb.dao;
 
 import es.deusto.sd.plassb.entity.RecyclingPlant;
 import org.springframework.data.jpa.repository.JpaRepository;

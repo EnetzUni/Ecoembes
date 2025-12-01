@@ -44,7 +44,6 @@ public class EcoembesController {
                 d.getId(),
                 d.getLocation(),
                 d.getMaxCapacity(),
-                d.getFillLevel(),
                 d.getLastUpdate(),
                 null // fillHistory puede ser null por ahora
         ), HttpStatus.CREATED);

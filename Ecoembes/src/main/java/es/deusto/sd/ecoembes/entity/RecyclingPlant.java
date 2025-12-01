@@ -22,7 +22,6 @@
         public RecyclingPlant() {}
 
         public RecyclingPlant(String name, String location) {
-            id 
             this.name = name;
             this.location = location;
         }

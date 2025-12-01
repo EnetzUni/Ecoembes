@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import es.deusto.sd.ecoembes.dto.DumpsterDTO;
 import es.deusto.sd.ecoembes.dto.FillLevelRecordDTO;
-import es.deusto.sd.ecoembes.dto.RecyclingPlantDTO;
 import es.deusto.sd.ecoembes.entity.Dumpster;
 import es.deusto.sd.ecoembes.entity.RecyclingPlant;
 import es.deusto.sd.ecoembes.entity.Employee;
@@ -20,7 +19,6 @@ import es.deusto.sd.ecoembes.service.DumpsterService;
 import es.deusto.sd.ecoembes.service.RecyclingPlantService;
 import es.deusto.sd.ecoembes.service.AssignmentService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController

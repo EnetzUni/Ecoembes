@@ -5,18 +5,13 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import es.deusto.ingenieria.sd.Sockets.CapacityRequestDTO;
-import es.deusto.ingenieria.sd.Sockets.CapacityResponseDTO;
 
 public class ContSocketServer {
 
     private final int port;
     private final ObjectMapper mapper = new ObjectMapper();
-    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
     public ContSocketServer(int port) {
         this.port = port;

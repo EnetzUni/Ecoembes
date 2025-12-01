@@ -8,6 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 
 @Entity
@@ -57,4 +58,10 @@ public class Dumpster {
     public String toString() {
         return "Dumpster [id=" + id + ", location=" + location + ", maxCapacity=" + maxCapacity + "]";
     }
+
+    @ManyToMany(mappedBy = "dumpsters")
+    private List<Assignment> assignments = new ArrayList<>();
+
+    public List<Assignment> getAssignments() { return assignments; }
+    public void setAssignments(List<Assignment> assignments) { this.assignments = assignments; }
 }

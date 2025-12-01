@@ -21,11 +21,11 @@ public class SocketRecyclingGateway implements IExternalRecyclingGateway {
     private final int serverPort;
     private final ObjectMapper mapper = new ObjectMapper();
 
-    public SocketRecyclingGateway(String serverIP, int serverPort) {
-        this.serverIP = serverIP;
-        this.serverPort = serverPort;
+    public SocketRecyclingGateway() {
+        // Aquí les damos el valor para evitar el error "blank final field"
+        this.serverIP = "127.0.0.1"; 
+        this.serverPort = 8080;     
     }
-
     // -----------------------------
     // Implementación de la interfaz
     // -----------------------------

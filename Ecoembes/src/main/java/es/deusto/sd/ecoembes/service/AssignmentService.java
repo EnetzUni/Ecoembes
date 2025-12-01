@@ -17,24 +17,32 @@ import es.deusto.sd.ecoembes.entity.RecyclingPlant;
 @Service
 public class AssignmentService {
 
-    // Registro en memoria (Si usas JPA/H2, esto debería ser un Repository, pero mantenemos tu lógica)
+    // Relación Dumpster -> Lista de Asignaciones
     private Map<Long, List<Assignment>> dumpsterAssignments = new HashMap<>();
+    
+    // NUEVO: Relación Assignment -> Planta (ya que no podemos guardarla en la entidad Assignment)
+    private Map<Assignment, RecyclingPlant> assignmentPlantMap = new HashMap<>();
 
     /**
      * Registra las asignaciones de un conjunto de dumpsters a un plant y empleado.
      */
     public void assignDumpstersToPlant(List<Dumpster> dumpsters, RecyclingPlant plant, Employee employee) {
-        // Creamos una única asignación (Ruta) que contiene varios dumpsters
+        // Creamos la asignación "original" (sin campo plant)
         Assignment newAssignment = new Assignment();
         newAssignment.setEmployee(employee);
-        newAssignment.setRecyclingPlant(plant); // Ahora funciona porque añadimos el campo a Assignment
-        newAssignment.setDate(new Date());      // Asignamos fecha actual por defecto
-        newAssignment.setDumpsters(new ArrayList<>(dumpsters)); // Usamos ArrayList mutable
+        newAssignment.setDate(new Date());
+        
+        // Si Assignment tiene setDumpsters, lo usamos. Si no, lo gestionamos solo en el mapa.
+        // Asumimos que Assignment volvió a tener 'private List<Dumpster> dumpsters' como estaba en tu archivo 'Assignment.java'
+        if (dumpsters != null) {
+            newAssignment.setDumpsters(new ArrayList<>(dumpsters));
+        }
 
-        // Actualizamos las relaciones para cada contenedor
+        // 1. Guardamos la relación con la planta en el Servicio
+        assignmentPlantMap.put(newAssignment, plant);
+
+        // 2. Actualizamos el mapa de contenedores
         for (Dumpster dumpster : dumpsters) {
-            
-            // 1. Actualizar mapa en memoria
             dumpsterAssignments.compute(dumpster.getId(), (id, assignments) -> {
                 if (assignments == null) {
                     List<Assignment> list = new ArrayList<>();
@@ -45,13 +53,8 @@ public class AssignmentService {
                     return assignments;
                 }
             });
-
-            // 2. Actualizar la entidad Dumpster (Relación bidireccional)
-            // Nota: Ahora Dumpster tiene getAssignments() gracias a la corrección
-            if (dumpster.getAssignments() == null) {
-                dumpster.setAssignments(new ArrayList<>());
-            }
-            dumpster.getAssignments().add(newAssignment);
+            
+            // NOTA: Como Dumpster volvió al estado original, NO llamamos a dumpster.setAssignments()
         }
     }
 
@@ -59,18 +62,16 @@ public class AssignmentService {
      * Devuelve la lista de assignments a la que pertenece un dumpster.
      */
     public List<Assignment> getAssignments(Dumpster dumpster) {
-        // Opción A: Sacarlo del mapa en memoria
         return dumpsterAssignments.getOrDefault(dumpster.getId(), new ArrayList<>());
-        
-        // Opción B (Si usaras JPA puro): return dumpster.getAssignments();
     }
 
     /**
-     * Devuelve todas las plantas a las que un dumpster ha sido asignado historicamente.
+     * Devuelve todas las plantas a las que un dumpster ha sido asignado.
+     * Recuperamos la planta usando el mapa auxiliar 'assignmentPlantMap'.
      */
     public List<RecyclingPlant> getAssignedPlants(Dumpster dumpster) {
         return getAssignments(dumpster).stream()
-                .map(Assignment::getRecyclingPlant)
+                .map(assignment -> assignmentPlantMap.get(assignment)) // Buscamos en el mapa
                 .filter(plant -> plant != null)
                 .distinct()
                 .collect(Collectors.toList());

@@ -29,7 +29,7 @@ public class Assignment {
     private Employee employee;
 
     @ManyToOne(optional = false)
-    private RecyclingPlant recyclingPlant;
+    private Dumpster dumpster;
 
     @ManyToMany
     @JoinTable(
@@ -45,10 +45,10 @@ public class Assignment {
 
     public Assignment() {}
 
-    public Assignment(Date date, Employee employee, RecyclingPlant recyclingPlant) {
+    public Assignment(Date date, Employee employee, Dumpster dumpster) {
         this.date = date;
         this.employee = employee;
-        this.recyclingPlant = recyclingPlant;
+        this.dumpster = dumpster;
     }
 
     // ----------------- //
@@ -63,8 +63,8 @@ public class Assignment {
     public Employee getEmployee() { return employee; }
     public void setEmployee(Employee employee) { this.employee = employee; }
 
-    public RecyclingPlant getRecyclingPlant() { return recyclingPlant; }
-    public void setRecyclingPlant(RecyclingPlant recyclingPlant) { this.recyclingPlant = recyclingPlant; }
+    public Dumpster getDumpster() { return dumpster; }
+    public void setDumpster(Dumpster dumpster) { this.dumpster = dumpster; }
 
     public List<Dumpster> getDumpsters() { return dumpsters; }
     public void setDumpsters(List<Dumpster> dumpsters) { this.dumpsters = dumpsters; }
@@ -90,6 +90,6 @@ public class Assignment {
     @Override
     public String toString() {
         return "Assignment [id=" + id + ", date=" + date + ", employee=" + employee 
-                + ", recyclingPlant=" + recyclingPlant + "]";
+                + ", dumpster=" + dumpster + "]";
     }
 }

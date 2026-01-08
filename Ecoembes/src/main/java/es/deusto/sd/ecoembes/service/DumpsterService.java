@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import es.deusto.sd.ecoembes.entity.Dumpster;
 import es.deusto.sd.ecoembes.entity.FillLevelRecord;
 import es.deusto.sd.ecoembes.dto.DumpsterDTO;
-import es.deusto.sd.ecoembes.dto.FillLevelRecordDTO;
+// import es.deusto.sd.ecoembes.dto.FillLevelRecordDTO;
 
 @Service
 public class DumpsterService {

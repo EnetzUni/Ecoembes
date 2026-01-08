@@ -1,7 +1,7 @@
 package es.deusto.sd.ecoembes.service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,68 +17,58 @@ import es.deusto.sd.ecoembes.entity.RecyclingPlant;
 @Service
 public class AssignmentService {
 
-    // Relación Dumpster -> Lista de Asignaciones
+    // Mapa: ID Contenedor -> Lista de Asignaciones
     private Map<Long, List<Assignment>> dumpsterAssignments = new HashMap<>();
     
-    // NUEVO: Relación Assignment -> Planta (ya que no podemos guardarla en la entidad Assignment)
-    private Map<Assignment, RecyclingPlant> assignmentPlantMap = new HashMap<>();
+    // YA NO NECESITAMOS 'assignmentPlantMap' porque Assignment tiene el campo RecyclingPlant.
 
     /**
-     * Registra las asignaciones de un conjunto de dumpsters a un plant y empleado.
+     * Registra las asignaciones
      */
     public void assignDumpstersToPlant(List<Dumpster> dumpsters, RecyclingPlant plant, Employee employee) {
-        // Creamos la asignación "original" (sin campo plant)
+        // Crear asignación
         Assignment newAssignment = new Assignment();
         newAssignment.setEmployee(employee);
-        newAssignment.setDate(new Date());
         
-        // Si Assignment tiene setDumpsters, lo usamos. Si no, lo gestionamos solo en el mapa.
-        // Asumimos que Assignment volvió a tener 'private List<Dumpster> dumpsters' como estaba en tu archivo 'Assignment.java'
-        if (dumpsters != null) {
-            newAssignment.setDumpsters(new ArrayList<>(dumpsters));
-        }
+        // AHORA SI PODEMOS USAR ESTO DIRECTAMENTE:
+        newAssignment.setRecyclingPlant(plant); 
+        
+        // Fecha como String (usamos fecha actual ISO)
+        newAssignment.setDate(LocalDate.now().toString()); 
+        
+        newAssignment.setDumpsters(new ArrayList<>(dumpsters));
 
-        // 1. Guardamos la relación con la planta en el Servicio
-        assignmentPlantMap.put(newAssignment, plant);
-
-        // 2. Actualizamos el mapa de contenedores
+        // Actualizamos el mapa en memoria
         for (Dumpster dumpster : dumpsters) {
-            dumpsterAssignments.compute(dumpster.getId(), (id, assignments) -> {
-                if (assignments == null) {
-                    List<Assignment> list = new ArrayList<>();
-                    list.add(newAssignment);
-                    return list;
-                } else {
-                    assignments.add(newAssignment);
-                    return assignments;
-                }
+            dumpsterAssignments.compute(dumpster.getId(), (id, list) -> {
+                if (list == null) list = new ArrayList<>();
+                list.add(newAssignment);
+                return list;
             });
-            
-            // NOTA: Como Dumpster volvió al estado original, NO llamamos a dumpster.setAssignments()
         }
     }
 
     /**
-     * Devuelve la lista de assignments a la que pertenece un dumpster.
+     * Devuelve assignments de un contenedor
      */
     public List<Assignment> getAssignments(Dumpster dumpster) {
         return dumpsterAssignments.getOrDefault(dumpster.getId(), new ArrayList<>());
     }
 
     /**
-     * Devuelve todas las plantas a las que un dumpster ha sido asignado.
-     * Recuperamos la planta usando el mapa auxiliar 'assignmentPlantMap'.
+     * Devuelve Plantas históricas de un contenedor
      */
     public List<RecyclingPlant> getAssignedPlants(Dumpster dumpster) {
         return getAssignments(dumpster).stream()
-                .map(assignment -> assignmentPlantMap.get(assignment)) // Buscamos en el mapa
+                // AHORA SACAMOS LA PLANTA DIRECTAMENTE DE LA ENTIDAD ASSIGNMENT
+                .map(Assignment::getRecyclingPlant) 
                 .filter(plant -> plant != null)
                 .distinct()
                 .collect(Collectors.toList());
     }
 
     /**
-     * Devuelve los empleados que han hecho asignaciones a un dumpster.
+     * Devuelve Empleados históricos
      */
     public List<Employee> getAssignmentEmployees(Dumpster dumpster) {
         return getAssignments(dumpster).stream()
@@ -89,7 +79,7 @@ public class AssignmentService {
     }
 
     /**
-     * Devuelve un empleado a partir de su ID buscando en el historial de asignaciones
+     * Buscar empleado por ID en el historial (útil para el Controller)
      */
     public Employee getEmployeeById(long employeeId) {
         return dumpsterAssignments.values().stream()
@@ -97,6 +87,6 @@ public class AssignmentService {
                 .map(Assignment::getEmployee)
                 .filter(e -> e != null && e.getId() == employeeId)
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Employee not found in current assignments"));
+                .orElseThrow(() -> new RuntimeException("Employee not found in assignments history"));
     }
 }

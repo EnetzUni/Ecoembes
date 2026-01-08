@@ -14,33 +14,27 @@ public class DumpsterDTO {
         this.maxCapacity = maxCapacity;
     }
 
-    // ---------- //
-    // Getters & Setters
-    // ---------- //
-
-    public long getId() { 
-        return id; 
-    }
-    public void setId(long id) { 
-        this.id = id; 
+    public long getId() {
+        return id;
     }
 
-    public String getLocation() { 
-        return location; 
-    }
-    public void setLocation(String location) { 
-        this.location = location; 
+    public void setId(long id) {
+        this.id = id;
     }
 
-    public float getMaxCapacity() { 
-        return maxCapacity; 
-    }
-    public void setMaxCapacity(float maxCapacity) { 
-        this.maxCapacity = maxCapacity; 
+    public String getLocation() {
+        return location;
     }
 
-    @Override
-    public String toString() {
-        return "DumpsterDTO [id=" + id + ", location=" + location + ", maxCapacity=" + maxCapacity + "]";
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public float getMaxCapacity() {
+        return maxCapacity;
+    }
+
+    public void setMaxCapacity(float maxCapacity) {
+        this.maxCapacity = maxCapacity;
     }
 }

@@ -1,16 +1,15 @@
 package es.deusto.sd.ecoembes.entity;
 
-import java.util.Date;
-import java.util.Objects;
+// IMPORTANTE: Borra los imports de java.util.Date y jakarta.persistence.Temporal
 
+import java.util.Objects;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
+// Borra @Temporal y TemporalType si los tienes
 
 @Entity
 public class FillLevelRecord {
@@ -19,8 +18,8 @@ public class FillLevelRecord {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Temporal(TemporalType.DATE)
-    private Date date;
+    // CAMBIO: De Date a String. Borramos @Temporal.
+    private String date; 
 
     private float fillLevel;
 
@@ -28,56 +27,24 @@ public class FillLevelRecord {
     @JoinColumn(name = "dumpster_id")
     private Dumpster dumpster;
 
-    // ------------ //
-    // Constructors //
-    // ------------ //
-
     public FillLevelRecord() {}
 
-    public FillLevelRecord(Date date, float fillLevel, Dumpster dumpster) {
+    // Constructor actualizado a String
+    public FillLevelRecord(String date, float fillLevel, Dumpster dumpster) {
         this.date = date;
         this.fillLevel = fillLevel;
         this.dumpster = dumpster;
     }
 
-    // ----------------- //
-    // Getters & Setters //
-    // ----------------- //
+    // Getters y Setters actualizados
+    public String getDate() { return date; }
+    public void setDate(String date) { this.date = date; }
 
+    // ... el resto de getters/setters igual ...
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
-
-    public Date getDate() { return date; }
-    public void setDate(Date date) { this.date = date; }
-
     public float getFillLevel() { return fillLevel; }
     public void setFillLevel(float fillLevel) { this.fillLevel = fillLevel; }
-
     public Dumpster getDumpster() { return dumpster; }
     public void setDumpster(Dumpster dumpster) { this.dumpster = dumpster; }
-
-    // ----------------- //
-    // hashCode & Equals //
-    // ----------------- //
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof FillLevelRecord)) return false;
-        return id == ((FillLevelRecord) obj).id;
-    }
-
-    // -------- //
-    // toString //
-    // -------- //
-
-    @Override
-    public String toString() {
-        return "FillLevelRecord [id=" + id + ", date=" + date + ", fillLevel=" + fillLevel + "]";
-    }
 }

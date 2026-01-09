@@ -16,6 +16,8 @@ import es.deusto.sd.ecoembes.entity.FillLevelRecord;
 import es.deusto.sd.ecoembes.entity.RecyclingPlant;
 import es.deusto.sd.ecoembes.service.AssignmentService;
 import es.deusto.sd.ecoembes.service.DumpsterService;
+import es.deusto.sd.ecoembes.dao.AssignmentRepository; // <--- NUEVO IMPORT
+import es.deusto.sd.ecoembes.entity.Assignment; // <--- Para que reconozca la entidad
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,15 +31,18 @@ public class EcoembesController {
     private final AssignmentService assignmentService;
     private final RecyclingPlantRepository recyclingPlantRepository;
     private final EmployeeRepository employeeRepository;
+    private final AssignmentRepository assignmentRepository; // <--- NUEVA VARIABLE
 
     public EcoembesController(DumpsterService dumpsterService, 
                               AssignmentService assignmentService,
                               RecyclingPlantRepository recyclingPlantRepository,
-                              EmployeeRepository employeeRepository) {
+                              EmployeeRepository employeeRepository,
+                              AssignmentRepository assignmentRepository) { // <--- NUEVO PARAMETRO
         this.dumpsterService = dumpsterService;
         this.assignmentService = assignmentService;
         this.recyclingPlantRepository = recyclingPlantRepository;
         this.employeeRepository = employeeRepository;
+        this.assignmentRepository = assignmentRepository; // <--- NUEVA ASIGNACION
     }
 
     // --- 1. BUSCAR CONTENEDORES ---
@@ -125,6 +130,21 @@ public class EcoembesController {
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    // --- 7. LISTAR TODAS LAS PLANTAS (GET) ---
+    @Operation(summary = "Get All Plants", description = "Retrieve a list of all recycling plants")
+    @GetMapping("/plants")
+    public ResponseEntity<List<RecyclingPlant>> getAllPlants() {
+        return ResponseEntity.ok(recyclingPlantRepository.findAll());
+    }
+
+    // --- 8. LISTAR TODAS LAS ASIGNACIONES (GET) ---
+    @Operation(summary = "Get All Assignments", description = "Retrieve a list of all route assignments")
+    @GetMapping("/assignments")
+    public ResponseEntity<List<Assignment>> getAllAssignments() {
+        // Esto devolverá la lista completa de asignaciones con sus empleados y contenedores
+        return ResponseEntity.ok(assignmentRepository.findAll());
     }
 
     // --- CLASE AUXILIAR PARA LEER EL JSON (DTO INTERNO) ---

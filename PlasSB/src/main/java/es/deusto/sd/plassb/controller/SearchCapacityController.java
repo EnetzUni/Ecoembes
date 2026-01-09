@@ -17,13 +17,15 @@ public class SearchCapacityController {
 
     /**
      * POST /api/capacity
-     * Receives a CapacityRequestDTO (plantId + date) and returns a CapacityResponseDTO (plantId + capacity + date)
+     * Recibe CapacityRequestDTO (plantId + dateString) 
+     * Devuelve CapacityResponseDTO (plantId + capacity + dateString)
      */
-
     @PostMapping
     public CapacityResponseDTO getCapacity(@RequestBody CapacityRequestDTO request) {
+        // request.getDate() es String, así que pasa directo al servicio actualizado
         float capacity = service.getCapacityByPlantAndDate(request.getPlantId(), request.getDate())
-                                .orElse(0f); // The capacity will be 0 if no capacity was found for that Plant and Date
+                                .orElse(0f); 
+        
         return new CapacityResponseDTO(request.getPlantId(), capacity, request.getDate());
     }
 }

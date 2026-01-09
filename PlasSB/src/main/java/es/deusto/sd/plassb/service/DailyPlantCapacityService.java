@@ -5,7 +5,6 @@ import es.deusto.sd.plassb.entity.DailyPlantCapacity;
 
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,8 +25,9 @@ public class DailyPlantCapacityService {
         return repository.save(capacity);
     }
 
-    public Optional<Float> getCapacityByPlantAndDate(long plantId, Date date) {
-        return repository.findByRecyclingPlantIdAndDate(plantId, date)
+    // El método debe recibir String y pasarlo tal cual
+    public Optional<Float> getCapacityByPlantAndDate(long plantId, String date) {
+        return repository.findByRecyclingPlantIdAndDate(plantId, date) // <--- Aquí pasas el String
                          .map(DailyPlantCapacity::getCapacity);
     }
 }

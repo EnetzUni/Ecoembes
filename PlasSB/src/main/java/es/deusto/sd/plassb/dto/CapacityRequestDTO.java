@@ -1,13 +1,13 @@
 package es.deusto.sd.plassb.dto;
 
-import java.util.Date;
-
 public class CapacityRequestDTO {
     private long plantId;
-    private Date date;
+    private String date; // <--- CAMBIO: Antes era Date
 
     public CapacityRequestDTO() {}
-    public CapacityRequestDTO(long plantId, Date date) {
+    
+    // Constructor actualizado
+    public CapacityRequestDTO(long plantId, String date) {
         this.plantId = plantId;
         this.date = date;
     }
@@ -15,6 +15,7 @@ public class CapacityRequestDTO {
     public long getPlantId() { return plantId; }
     public void setPlantId(long plantId) { this.plantId = plantId; }
 
-    public Date getDate() { return date; }
-    public void setDate(Date date) { this.date = date; }
+    // Getter y Setter actualizados
+    public String getDate() { return date; }
+    public void setDate(String date) { this.date = date; }
 }

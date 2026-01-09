@@ -42,7 +42,7 @@ public class ContSocketServer {
              DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream())) {
 
             String requestJson = in.readUTF();
-            CapacityRequestDTO request = mapper.readValue(requestJson, CapacityRequestDTO.class);
+            CapacityyRequestDTO request = mapper.readValue(requestJson, CapacityyRequestDTO.class);
 
             CapacityResponseDTO response = MemoryStorage.getCapacity(request.getPlantId(), request.getDate());
 

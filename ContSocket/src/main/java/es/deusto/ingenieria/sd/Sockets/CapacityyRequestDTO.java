@@ -2,12 +2,12 @@ package es.deusto.ingenieria.sd.Sockets;
 
 import java.util.Date;
 
-public class CapacityRequestDTO {
+public class CapacityyRequestDTO {
     private long plantId;
     private Date date;
 
-    public CapacityRequestDTO() {}
-    public CapacityRequestDTO(long plantId, Date date) {
+    public CapacityyRequestDTO() {}
+    public CapacityyRequestDTO(long plantId, Date date) {
         this.plantId = plantId;
         this.date = date;
     }

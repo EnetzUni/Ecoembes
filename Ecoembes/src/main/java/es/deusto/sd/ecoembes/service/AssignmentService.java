@@ -1,14 +1,12 @@
 package es.deusto.sd.ecoembes.service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import es.deusto.sd.ecoembes.dao.AssignmentRepository;
 import es.deusto.sd.ecoembes.entity.Assignment;
 import es.deusto.sd.ecoembes.entity.Dumpster;
 import es.deusto.sd.ecoembes.entity.Employee;
@@ -17,42 +15,37 @@ import es.deusto.sd.ecoembes.entity.RecyclingPlant;
 @Service
 public class AssignmentService {
 
-    // Mapa: ID Contenedor -> Lista de Asignaciones
-    private Map<Long, List<Assignment>> dumpsterAssignments = new HashMap<>();
-    
-    // YA NO NECESITAMOS 'assignmentPlantMap' porque Assignment tiene el campo RecyclingPlant.
+    // 1. Declaramos la variable del repositorio
+    private final AssignmentRepository assignmentRepository;
+
+    // 2. Inyectamos el repositorio en el constructor
+    public AssignmentService(AssignmentRepository assignmentRepository) {
+        this.assignmentRepository = assignmentRepository;
+    }
 
     /**
-     * Registra las asignaciones
+     * Registra las asignaciones (Una por cada contenedor)
      */
     public void assignDumpstersToPlant(List<Dumpster> dumpsters, RecyclingPlant plant, Employee employee) {
-        // Crear asignación
-        Assignment newAssignment = new Assignment();
-        newAssignment.setEmployee(employee);
-        
-        // AHORA SI PODEMOS USAR ESTO DIRECTAMENTE:
-        newAssignment.setRecyclingPlant(plant); 
-        
-        // Fecha como String (usamos fecha actual ISO)
-        newAssignment.setDate(LocalDate.now().toString()); 
-        
-        newAssignment.setDumpsters(new ArrayList<>(dumpsters));
+        String today = LocalDate.now().toString();
 
-        // Actualizamos el mapa en memoria
-        for (Dumpster dumpster : dumpsters) {
-            dumpsterAssignments.compute(dumpster.getId(), (id, list) -> {
-                if (list == null) list = new ArrayList<>();
-                list.add(newAssignment);
-                return list;
-            });
+        for (Dumpster d : dumpsters) {
+            Assignment assignment = new Assignment();
+            assignment.setDate(today);
+            assignment.setEmployee(employee);
+            assignment.setRecyclingPlant(plant);
+            assignment.setDumpster(d); // Asignación 1 a 1
+
+            // 3. Guardamos en Base de Datos usando la variable que inyectamos
+            assignmentRepository.save(assignment);
         }
     }
 
     /**
-     * Devuelve assignments de un contenedor
+     * Devuelve assignments de un contenedor (desde BD)
      */
     public List<Assignment> getAssignments(Dumpster dumpster) {
-        return dumpsterAssignments.getOrDefault(dumpster.getId(), new ArrayList<>());
+        return assignmentRepository.findByDumpster(dumpster);
     }
 
     /**
@@ -60,8 +53,7 @@ public class AssignmentService {
      */
     public List<RecyclingPlant> getAssignedPlants(Dumpster dumpster) {
         return getAssignments(dumpster).stream()
-                // AHORA SACAMOS LA PLANTA DIRECTAMENTE DE LA ENTIDAD ASSIGNMENT
-                .map(Assignment::getRecyclingPlant) 
+                .map(Assignment::getRecyclingPlant)
                 .filter(plant -> plant != null)
                 .distinct()
                 .collect(Collectors.toList());
@@ -79,11 +71,12 @@ public class AssignmentService {
     }
 
     /**
-     * Buscar empleado por ID en el historial (útil para el Controller)
+     * Buscar empleado por ID en el historial
+     * (Nota: Este método es ineficiente en BD real, pero cumple la función lógica que tenías)
      */
     public Employee getEmployeeById(long employeeId) {
-        return dumpsterAssignments.values().stream()
-                .flatMap(List::stream)
+        // Buscamos en TODAS las asignaciones (cuidado si hay muchas)
+        return assignmentRepository.findAll().stream()
                 .map(Assignment::getEmployee)
                 .filter(e -> e != null && e.getId() == employeeId)
                 .findFirst()

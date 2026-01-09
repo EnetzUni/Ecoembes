@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,6 +25,7 @@ public class RecyclingPlant {
     // RELACIÓN NUEVA: Una planta tiene muchos Assignments
     // 'mappedBy = "recyclingPlant"' indica que la clave ajena está en la clase Assignment
     @OneToMany(mappedBy = "recyclingPlant")
+    @JsonIgnore // <--- AÑADE ESTO AQUÍ
     private List<Assignment> assignments = new ArrayList<>();
 
     // ------------ //

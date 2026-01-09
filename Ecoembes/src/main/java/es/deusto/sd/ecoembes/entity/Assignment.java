@@ -1,16 +1,8 @@
 package es.deusto.sd.ecoembes.entity;
 
-import java.util.List;
 import java.util.Objects;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 
 @Entity
 public class Assignment {
@@ -19,44 +11,35 @@ public class Assignment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    // FECHA COMO STRING (Para evitar problemas de formato)
     private String date;
 
     @ManyToOne(optional = false)
     private Employee employee;
 
-    // RELACIÓN BIDIRECCIONAL CON RECYCLINGPLANT
-    // Este campo es el que busca el 'mappedBy' de RecyclingPlant
+    // Relación con Planta
     @ManyToOne(optional = true) 
     @JoinColumn(name = "recycling_plant_id", nullable = true)
     private RecyclingPlant recyclingPlant;
 
-    @ManyToMany
-    @JoinTable(
-        name = "assignment_dumpster",
-        joinColumns = @JoinColumn(name = "assignment_id"),
-        inverseJoinColumns = @JoinColumn(name = "dumpster_id")
-    )
-    private List<Dumpster> dumpsters;
-
-    // ------------ //
-    // Constructors //
-    // ------------ //
+    // Relación con Contenedor
+    @ManyToOne(optional = false)
+    @JsonIgnore
+    @JoinColumn(name = "dumpster_id")
+    private Dumpster dumpster;
 
     public Assignment() {}
 
-    public Assignment(String date, Employee employee, List<Dumpster> dumpsters) {
+    // --- CONSTRUCTOR CORREGIDO (Ahora acepta los 4 campos) ---
+    public Assignment(String date, Employee employee, Dumpster dumpster, RecyclingPlant recyclingPlant) {
         this.date = date;
         this.employee = employee;
-        this.dumpsters = dumpsters;
+        this.dumpster = dumpster;
+        this.recyclingPlant = recyclingPlant;
     }
 
-    // ----------------- //
-    // Getters & Setters //
-    // ----------------- //
-
+    // Getters y Setters
     public long getId() { return id; }
-
+    
     public String getDate() { return date; }
     public void setDate(String date) { this.date = date; }
 
@@ -66,12 +49,8 @@ public class Assignment {
     public RecyclingPlant getRecyclingPlant() { return recyclingPlant; }
     public void setRecyclingPlant(RecyclingPlant recyclingPlant) { this.recyclingPlant = recyclingPlant; }
 
-    public List<Dumpster> getDumpsters() { return dumpsters; }
-    public void setDumpsters(List<Dumpster> dumpsters) { this.dumpsters = dumpsters; }
-
-    // ----------------- //
-    // hashCode & Equals //
-    // ----------------- //
+    public Dumpster getDumpster() { return dumpster; }
+    public void setDumpster(Dumpster dumpster) { this.dumpster = dumpster; }
 
     @Override
     public int hashCode() { return Objects.hash(id); }

@@ -1,20 +1,34 @@
 package es.deusto.sd.ecoembes.dto;
 
-import java.util.Date;
-
 public class CapacityRequestDTO {
+    
     private long plantId;
-    private Date date;
+    private String date; // IMPORTANTE: String para evitar problemas de formato con JSON
 
-    public CapacityRequestDTO() {}
-    public CapacityRequestDTO(long plantId, Date date) {
+    // 1. Constructor vacío (Obligatorio para que Jackson pueda crear el objeto)
+    public CapacityRequestDTO() {
+    }
+
+    // 2. Constructor con todo (Para que tú lo uses en el Service fácilmente)
+    public CapacityRequestDTO(long plantId, String date) {
         this.plantId = plantId;
         this.date = date;
     }
 
-    public long getPlantId() { return plantId; }
-    public void setPlantId(long plantId) { this.plantId = plantId; }
+    // 3. Getters y Setters
+    public long getPlantId() {
+        return plantId;
+    }
 
-    public Date getDate() { return date; }
-    public void setDate(Date date) { this.date = date; }
+    public void setPlantId(long plantId) {
+        this.plantId = plantId;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
 }

@@ -4,17 +4,15 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Optional;
 
+import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import es.deusto.sd.ecoembes.dto.CapacityRequestDTO;
 import es.deusto.sd.ecoembes.dto.CapacityResponseDTO;
-import org.springframework.stereotype.Component; // <--- IMPORTANTE
 
-@Component // <--- ESTO ES LO QUE TE FALTA
+@Component
 public class SocketRecyclingGateway implements IExternalRecyclingGateway {
 
     private final String serverIP;
@@ -22,26 +20,23 @@ public class SocketRecyclingGateway implements IExternalRecyclingGateway {
     private final ObjectMapper mapper = new ObjectMapper();
 
     public SocketRecyclingGateway() {
-        // Aquí les damos el valor para evitar el error "blank final field"
+        // Configuración por defecto (ajusta si tu server de sockets tiene otra IP/Puerto)
         this.serverIP = "127.0.0.1"; 
         this.serverPort = 8080;     
     }
-    // -----------------------------
-    // Implementación de la interfaz
-    // -----------------------------
+
     @Override
     public Optional<Float> getCapacity(CapacityRequestDTO request) {
         try (Socket socket = new Socket(serverIP, serverPort);
              DataOutputStream out = new DataOutputStream(socket.getOutputStream());
              DataInputStream in = new DataInputStream(socket.getInputStream())) {
 
-            // Convertimos la fecha a LocalDate (yyyy-MM-dd)
-            LocalDate localDate = request.getDate().toInstant()
-                    .atZone(ZoneId.systemDefault())
-                    .toLocalDate();
-
-            // Enviamos la consulta al servidor de sockets
-            out.writeUTF("GET#" + request.getPlantId() + "#" + localDate.toString());
+            // --- CAMBIO: Ya no convertimos Date a LocalDate ---
+            // Como request.getDate() ya es un String "yyyy-MM-dd", lo enviamos directo.
+            String messageToSend = "GET#" + request.getPlantId() + "#" + request.getDate();
+            
+            // Enviamos mensaje al servidor de sockets
+            out.writeUTF(messageToSend);
 
             // Leemos respuesta
             String response = in.readUTF();
@@ -50,34 +45,22 @@ public class SocketRecyclingGateway implements IExternalRecyclingGateway {
                 return Optional.empty();
             }
 
-            // Convertimos JSON a CapacityResponseDTO
+            // Convertimos la respuesta JSON a objeto
             CapacityResponseDTO dto = mapper.readValue(response, CapacityResponseDTO.class);
 
             return Optional.of(dto.getCapacity());
 
         } catch (IOException e) {
-            System.err.println("Socket ERROR getCapacity: " + e.getMessage());
+            // Es normal que falle si no tienes el servidor de sockets levantado, 
+            // pero al menos no rompe la compilación.
+            System.err.println("Socket (No crítico si usas REST): " + e.getMessage());
             return Optional.empty();
         }
     }
 
-    // -----------------------------
-    // Método opcional para enviar capacidad
-    // -----------------------------
-    public boolean sendCapacity(CapacityResponseDTO dto) {
-        try (Socket socket = new Socket(serverIP, serverPort);
-             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-             DataInputStream in = new DataInputStream(socket.getInputStream())) {
-
-            String json = mapper.writeValueAsString(dto);
-            out.writeUTF("SEND#" + json);
-
-            String response = in.readUTF();
-            return "OK".equalsIgnoreCase(response);
-
-        } catch (IOException e) {
-            System.err.println("Socket ERROR sendCapacity: " + e.getMessage());
-            return false;
-        }
+    @Override
+    public boolean sendDailyPlan(long plantId, String date, int totalDumpsters, float totalWaste) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'sendDailyPlan'");
     }
 }

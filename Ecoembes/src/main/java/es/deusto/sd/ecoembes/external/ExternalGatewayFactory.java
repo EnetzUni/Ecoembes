@@ -8,16 +8,21 @@ public class ExternalGatewayFactory {
     private final RestRecyclingGateway restGateway;
     private final SocketRecyclingGateway socketGateway;
 
-    public ExternalGatewayFactory(RestRecyclingGateway restGateway,
+    // Spring inyecta ambas implementaciones
+    public ExternalGatewayFactory(RestRecyclingGateway restGateway, 
                                   SocketRecyclingGateway socketGateway) {
         this.restGateway = restGateway;
         this.socketGateway = socketGateway;
     }
 
-    public IExternalRecyclingGateway getGateway(ExternalGatewayType type) {
-        return switch (type) {
-            case REST -> restGateway;
-            case SOCKET -> socketGateway;
-        };
+    // --- CORRECCIÓN: Usamos 'long' en vez de 'ExternalGatewayType' ---
+    public IExternalRecyclingGateway getGateway(long plantId) {
+        // ID 1 -> Sockets
+        // ID 2 (o resto) -> REST
+        if (plantId == 1) {
+            return socketGateway;
+        } else {
+            return restGateway;
+        }
     }
 }

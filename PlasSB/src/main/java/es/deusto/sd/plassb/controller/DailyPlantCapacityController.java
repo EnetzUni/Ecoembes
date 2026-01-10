@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/capacities")
+@RequestMapping("/api/capacity") // <--- Coincide con tu CAPACITY_URL
 public class DailyPlantCapacityController {
 
     private final DailyPlantCapacityService service;

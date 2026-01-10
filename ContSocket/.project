@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>soc1_translationSocketServer-ContSocket</name>
-	<comment>Project soc1_translationSocketServer created by Buildship.</comment>
+	<name>ContSocket</name>
+	<comment>Project ContSocket created by Buildship.</comment>
 	<projects>
 	</projects>
 	<buildSpec>

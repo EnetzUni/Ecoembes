@@ -1,13 +1,11 @@
 package es.deusto.ingenieria.sd.Sockets;
 
-import java.util.Date;
-
-public class CapacityyRequestDTO {
+public class CapacityyRequestDTO { // Nota: Tiene dos 'y' como en tu archivo original
     private long plantId;
-    private Date date;
+    private String date; // <--- CAMBIO: String
 
     public CapacityyRequestDTO() {}
-    public CapacityyRequestDTO(long plantId, Date date) {
+    public CapacityyRequestDTO(long plantId, String date) {
         this.plantId = plantId;
         this.date = date;
     }
@@ -15,6 +13,6 @@ public class CapacityyRequestDTO {
     public long getPlantId() { return plantId; }
     public void setPlantId(long plantId) { this.plantId = plantId; }
 
-    public Date getDate() { return date; }
-    public void setDate(Date date) { this.date = date; }
+    public String getDate() { return date; }
+    public void setDate(String date) { this.date = date; }
 }

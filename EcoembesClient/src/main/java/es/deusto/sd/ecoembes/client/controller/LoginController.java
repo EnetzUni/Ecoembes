@@ -26,7 +26,6 @@ public class LoginController implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        /*
         // 1. Get data from the view
         String email = view.getLoginEmailString();
         String password = view.getLoginEmailPassword();
@@ -35,9 +34,6 @@ public class LoginController implements ActionListener {
 
         // 2. Try to login
         boolean success = login(email, password);
-        */
-
-        boolean success = true;
 
         if (success) {
             // --- SUCCESS: SWITCH FRAMES ---

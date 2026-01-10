@@ -5,12 +5,15 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-
-// ¡ADIÓS JACKSON! No necesitamos imports externos.
+import java.util.ArrayList;
+import java.util.List;
 
 public class ContSocketServer {
 
     private final int port;
+    
+    // 💾 1. LA BASE DE DATOS EN MEMORIA (Lista compartida)
+    private static final List<String> assignmentsDb = new ArrayList<>();
 
     public ContSocketServer(int port) {
         this.port = port;
@@ -18,14 +21,12 @@ public class ContSocketServer {
 
     public void start() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
-            System.out.println("--- Servidor ContSocket (Modo Manual) Iniciado en puerto " + port + " ---");
+            System.out.println("--- Servidor ContSocket (Con Memoria Visible) Iniciado en puerto " + port + " ---");
             int clientCount = 0;
 
             while (true) {
                 Socket clientSocket = serverSocket.accept();
                 clientCount++;
-                System.out.println(" - Nueva conexion aceptada. Cliente #" + clientCount);
-
                 final int clientNumber = clientCount;
                 new Thread(() -> handleClient(clientSocket, clientNumber)).start();
             }
@@ -36,93 +37,70 @@ public class ContSocketServer {
     }
 
     private void handleClient(Socket clientSocket, int clientNumber) {
-    try (DataInputStream in = new DataInputStream(clientSocket.getInputStream());
-         DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream())) {
+        try (DataInputStream in = new DataInputStream(clientSocket.getInputStream());
+             DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream())) {
 
-        String requestJson = in.readUTF(); 
-        System.out.println("   > Recibido Cliente #" + clientNumber + ": " + requestJson);
+            // Leemos lo que envía el cliente
+            String requestJson = in.readUTF(); 
+            System.out.println("   > [Cliente #" + clientNumber + "] Envio: " + requestJson);
 
-        // --- LÓGICA DE DECISIÓN ---
-        // Miramos si el JSON tiene la palabra "ASSIGNMENT" o campos de basura
-        if (requestJson.contains("ASSIGNMENT") || requestJson.contains("totalWaste")) {
-            
-            // === CASO 1: ES UNA NOTIFICACIÓN DE BASURA ===
-            System.out.println("   🔔 ¡NOTIFICACIÓN RECIBIDA!");
-            
-            long plantId = extractLong(requestJson, "plantId");
-            double waste = extractDouble(requestJson, "totalWaste");
-            long dumpsters = extractLong(requestJson, "totalDumpsters");
+            // --- TRUCO 1: COMANDO DE ESPÍA ---
+            // Si enviamos la palabra "ADMIN_REPORT", el servidor nos chiva todo lo que tiene
+            if (requestJson.equals("ADMIN_REPORT")) {
+                String report;
+                synchronized (assignmentsDb) {
+                    report = "--- MEMORIA ACTUAL ---\n" + assignmentsDb.toString();
+                }
+                out.writeUTF(report);
+                System.out.println("   🕵️ [ADMIN] Reporte de memoria enviado.");
+                return; // Terminamos aquí
+            }
 
-            System.out.println("     - Planta ID: " + plantId);
-            System.out.println("     - Contenedores: " + dumpsters);
-            System.out.println("     - Basura Total: " + waste + " kg");
+            // --- LÓGICA NORMAL ---
+            // Si el mensaje parece una asignación (tiene basura), lo guardamos
+            if (requestJson.contains("totalWaste") || requestJson.contains("ASSIGNMENT")) {
+                
+                synchronized (assignmentsDb) {
+                    assignmentsDb.add(requestJson);
+                    
+                    // --- TRUCO 2: LOG VISUAL INMEDIATO ---
+                    // Cada vez que guardamos, imprimimos el tamaño y el último dato
+                    System.out.println("   💾 ¡DATO GUARDADO EN RAM!");
+                    System.out.println("      Total registros almacenados: " + assignmentsDb.size());
+                    System.out.println("      Último registro: " + requestJson);
+                }
+                
+                out.writeUTF("{\"status\":\"OK\", \"msg\":\"Saved in RAM\"}");
 
-            // Respondemos OK
-            out.writeUTF("{\"status\":\"OK\", \"message\":\"Received\"}");
+            } else {
+                // Si no, es una consulta de capacidad normal
+                long plantId = extractLong(requestJson, "plantId");
+                
+                // Lógica dummy para devolver capacidad
+                float capacity = (plantId == 1) ? 5000.0f : 0f;
+                String responseJson = "{\"plantId\":" + plantId + ", \"capacity\":" + capacity + "}";
+                
+                out.writeUTF(responseJson);
+            }
 
-        } else {
-            
-            // === CASO 2: ES UNA CONSULTA DE CAPACIDAD (Lo que ya tenías) ===
-            System.out.println("   🔍 Consulta de capacidad detectada.");
-            long plantId = extractLong(requestJson, "plantId");
-            // Aquí tu lógica de BBDD simulada...
-            double capacity = 115.5; // (O tu lógica real de búsqueda)
-
-            String responseJson = "{\"plantId\": " + plantId + ", \"capacity\": " + capacity + ", \"status\": \"OK\"}";
-            out.writeUTF(responseJson);
+        } catch (IOException e) {
+            System.err.println("Error: " + e.getMessage());
+        } finally {
+            try { clientSocket.close(); } catch (IOException ignored) {}
         }
-
-    } catch (IOException e) {
-        System.err.println("Error: " + e.getMessage());
-    } finally {
-        try { clientSocket.close(); } catch (IOException ignored) {}
     }
-}
 
- // --- MÉTODOS AUXILIARES PARA NO USAR LIBRERÍAS ---
-private double extractDouble(String json, String key) {
-    try {
-        String search = "\"" + key + "\":";
-        int start = json.indexOf(search);
-        if (start == -1) return 0.0;
-        
-        start += search.length();
-        int end = json.indexOf(",", start);
-        if (end == -1) end = json.indexOf("}", start);
-        
-        String value = json.substring(start, end).trim();
-        return Double.parseDouble(value);
-    } catch (Exception e) { return 0.0; }
-}
-    
-    // Saca un número de un JSON simple
+    // Helpers para sacar datos sin Jackson
     private long extractLong(String json, String key) {
         try {
             String search = "\"" + key + "\":";
             int start = json.indexOf(search);
             if (start == -1) return -1;
-            
-            start += search.length(); // Nos ponemos después de los dos puntos
+            start += search.length();
             int end = json.indexOf(",", start);
             if (end == -1) end = json.indexOf("}", start);
-            
-            String value = json.substring(start, end).trim();
-            return Long.parseLong(value);
+            return Long.parseLong(json.substring(start, end).trim());
         } catch (Exception e) { return -1; }
-    }
-
-    // Saca un texto de un JSON simple
-    private String extractString(String json, String key) {
-        try {
-            String search = "\"" + key + "\":\""; // Busca "key":"
-            int start = json.indexOf(search);
-            if (start == -1) return "unknown";
-            
-            start += search.length();
-            int end = json.indexOf("\"", start); // Busca la comilla de cierre
-            
-            return json.substring(start, end);
-        } catch (Exception e) { return "unknown"; }
     }
 
     public static void main(String[] args) {

@@ -122,6 +122,10 @@ public class LoginView {
         loginButton.addActionListener(listener);
     }
 
+    public JFrame getFrame() {
+        return frame;
+    }
+
     public void show() {
         frame.setVisible(true);
     }

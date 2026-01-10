@@ -1,10 +1,9 @@
 package es.deusto.sd.ecoembes.service;
 
-import org.springframework.stereotype.Service;
 import es.deusto.sd.ecoembes.dto.CapacityRequestDTO;
 import es.deusto.sd.ecoembes.external.ExternalGatewayFactory;
-import es.deusto.sd.ecoembes.external.ExternalGatewayType;
 import es.deusto.sd.ecoembes.external.IExternalRecyclingGateway;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
@@ -18,28 +17,17 @@ public class CapacityExternalService {
     }
 
     public Optional<Float> requestCapacity(long plantId, String date) {
-        // 1. Pedimos a la factoría (que nos dará el RestRecyclingGateway de arriba)
-        IExternalRecyclingGateway gateway = 
-                gatewayFactory.getGateway(ExternalGatewayType.REST);
-
-        // 2. Preparamos los datos
-        CapacityRequestDTO request = new CapacityRequestDTO(plantId, date);
-
-        // 3. Ejecutamos la llamada (que usará el código http del punto 2)
-        return gateway.getCapacity(request);
+        IExternalRecyclingGateway gateway = gatewayFactory.getGateway(plantId);
+        return gateway.getCapacity(new CapacityRequestDTO(plantId, date));
     }
 
-    public boolean notifyDailyWork(long plantId, String date, int dumpstersCount, float totalWaste) {
-    
-    IExternalRecyclingGateway gateway = 
-            gatewayFactory.getGateway(ExternalGatewayType.REST);
+    // ✅ CORREGIDO: Recibe directamente los parámetros (sin objeto Assignment)
+    public boolean notifyAssignment(long plantId, String date, int totalDumpsters, float totalWaste) {
+        
+        // 1. Pedimos el Gateway adecuado para este ID (Socket o REST)
+        IExternalRecyclingGateway gateway = gatewayFactory.getGateway(plantId);
 
-    // Llamada directa con las variables
-    boolean sent = gateway.sendDailyPlan(plantId, date, dumpstersCount, totalWaste);
-
-    if (sent) {
-        System.out.println("✅ Plan enviado.");
+        // 2. Pasamos los datos directamente
+        return gateway.notifyAssignment(plantId, date, totalDumpsters, totalWaste);
     }
-    return sent;
-}
 }

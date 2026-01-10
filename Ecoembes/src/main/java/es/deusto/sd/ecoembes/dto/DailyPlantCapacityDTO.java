@@ -1,4 +1,4 @@
-package es.deusto.sd.ecoembes.dto;
+/*package es.deusto.sd.ecoembes.dto;
 
 import java.util.Date;
 
@@ -31,3 +31,4 @@ public class DailyPlantCapacityDTO {
     	this.capacity = capacity; 
     	}
 }
+*/

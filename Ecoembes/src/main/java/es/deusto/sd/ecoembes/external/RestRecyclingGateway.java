@@ -17,17 +17,12 @@ import es.deusto.sd.ecoembes.dto.CapacityResponseDTO;
 @Component
 public class RestRecyclingGateway implements IExternalRecyclingGateway {
 
-    // URL directa a tu servidor PlasSB (Puerto 8081)
-    // URL 1: Para consultar si cabe basura (antes se llamaba API_URL)
-    private final String API_URL = "http://localhost:8081/api/capacities/check";
-    
-    // URL 2: Para enviar el plan diario (la nueva)
+    private final String API_URL = "http://localhost:8081/api/capacity/check";
     private final String PLAN_URL = "http://localhost:8081/api/plans";
     
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
 
-    // 1. Constructor igual que en CurrencyServiceGateway
     public RestRecyclingGateway() {
         this.httpClient = HttpClient.newHttpClient();
         this.objectMapper = new ObjectMapper();
@@ -36,53 +31,56 @@ public class RestRecyclingGateway implements IExternalRecyclingGateway {
     @Override
     public Optional<Float> getCapacity(CapacityRequestDTO requestDto) {
         try {
-            // 2. Convertimos el objeto Java (DTO) a texto JSON
-            // (Esto no estaba en Currency porque allí enviaban parámetros en la URL)
+            // 1. Preparar el JSON
             String requestBody = objectMapper.writeValueAsString(requestDto);
 
-            // 3. Crear la Request (Estilo Currency, pero con POST)
+            // --- LOG DE DEBUG (Para ver qué enviamos y a dónde) ---
+            System.out.println("🤖 REST [OUT] -> Intentando conectar a: " + API_URL);
+            System.out.println("🤖 REST [OUT] -> Enviando Body: " + requestBody);
+            // -----------------------------------------------------
+
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(API_URL))
-                    .header("Content-Type", "application/json") // Importante avisar que enviamos JSON
+                    .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                     .build();
 
-            // 4. Enviar y obtener respuesta (Idéntico a Currency)
+            // 2. Enviar petición
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-            // 5. Validar respuesta (Idéntico a Currency)
+            // --- LOG DE DEBUG (Para ver qué responde el servidor) ---
+            System.out.println("🤖 REST [IN]  -> Status Code: " + response.statusCode());
+            System.out.println("🤖 REST [IN]  -> Body Respuesta: " + response.body());
+            // -----------------------------------------------------
+
             if (response.statusCode() == 200) {
-                // Parseamos el JSON de vuelta al DTO de respuesta
                 CapacityResponseDTO responseDto = objectMapper.readValue(response.body(), CapacityResponseDTO.class);
-                
-                // Devolvemos el dato que nos interesa (la capacidad)
                 return Optional.of(responseDto.getCapacity());
             } else {
+                System.err.println("⚠️ El servidor respondió pero no con 200 OK.");
                 return Optional.empty();
             }
+
         } catch (Exception ex) {
-            // Gestión de errores igual que el template
-            System.err.println("Error en Gateway: " + ex.getMessage());
+            // --- LOG DE ERROR CRÍTICO (Aquí saldrá el motivo real del fallo) ---
+            System.err.println("❌ ERROR DE CONEXIÓN CON PLASSB:");
+            ex.printStackTrace(); // <--- ESTO ES LO QUE NECESITAMOS VER
             return Optional.empty();
         }
     }
 
+    // AQUI ESTÁ LO QUE QUERÍAS: Usamos los parámetros sueltos
     @Override
-    public boolean sendDailyPlan(long plantId, String date, int totalDumpsters, float totalWaste) {
+    public boolean notifyAssignment(long plantId, String date, int totalDumpsters, float totalWaste) {
         try {
-            // TRUCO: Creamos un Mapa para simular el objeto JSON
             Map<String, Object> jsonMap = new HashMap<>();
-            
-            // Las claves ("keys") deben ser EXACTAMENTE las que espera PlasSB
             jsonMap.put("plantId", plantId);
             jsonMap.put("date", date);
             jsonMap.put("totalDumpsters", totalDumpsters);
             jsonMap.put("totalWaste", totalWaste);
 
-            // Jackson convierte el Mapa a un String JSON igual que si fuera un DTO
             String jsonBody = objectMapper.writeValueAsString(jsonMap);
 
-            // El resto es igual...
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(PLAN_URL))
                     .header("Content-Type", "application/json")

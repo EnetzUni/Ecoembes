@@ -4,8 +4,9 @@ import es.deusto.sd.ecoembes.dto.CapacityRequestDTO;
 import java.util.Optional;
 
 public interface IExternalRecyclingGateway {
-    // Definimos el método igual que en tu ejemplo
-    public Optional<Float> getCapacity(CapacityRequestDTO request);
+    
+    Optional<Float> getCapacity(CapacityRequestDTO request);
 
-    boolean sendDailyPlan(long plantId, String date, int totalDumpsters, float totalWaste);
+    // Mantenemos tus parámetros originales (primitivos), solo cambiamos el nombre
+    boolean notifyAssignment(long plantId, String date, int totalDumpsters, float totalWaste);
 }

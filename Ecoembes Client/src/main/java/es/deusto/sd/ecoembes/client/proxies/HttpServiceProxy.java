@@ -69,11 +69,9 @@ public class HttpServiceProxy implements IEcoembesServiceProxy {
     }
 
     @Override
-    public float getPlantCapacity(long plantId, String token) {
+    public float getPlantCapacity(long plantId, String date, String token) {
         try {
-            // Ruta vista en ExternalController: @GetMapping("/capacity") -> /api/external/capacity
-            // Parametros: plantId y date
-            String date = LocalDate.now().toString(); // Usamos fecha de hoy
+            // CAMBIO: Usamos la variable 'date' del argumento directamente en la URL
             String url = BASE_URL + "/api/external/capacity?plantId=" + plantId + "&date=" + date;
             
             HttpRequest request = HttpRequest.newBuilder()
@@ -85,7 +83,7 @@ public class HttpServiceProxy implements IEcoembesServiceProxy {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             
             if (response.statusCode() == 200) {
-                // El ExternalController devuelve un Map JSON: {"capacity": 123.0, "status": "OK"...}
+                // Leemos el JSON {"capacity": 123.0, ...}
                 JsonNode node = objectMapper.readTree(response.body());
                 if (node.has("capacity")) {
                     return (float) node.get("capacity").asDouble();
@@ -93,7 +91,7 @@ public class HttpServiceProxy implements IEcoembesServiceProxy {
             }
         } catch (Exception e) { e.printStackTrace(); }
         
-        return -1f; // Indica error o no encontrado
+        return -1f; // Retorno de error
     }
 
     @Override

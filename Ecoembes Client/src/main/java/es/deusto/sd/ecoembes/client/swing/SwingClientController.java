@@ -34,10 +34,13 @@ public class SwingClientController {
         return serviceProxy.getPlants(token);
     }
 
-    // 4. Consultar capacidad de una planta específica
-    public float checkPlantCapacity(RecyclingPlant plant) {
+    // 4. Consultar capacidad de una planta específica para una fecha dada
+    // pasando la fecha seleccionada en el UI (ej: "2025-01-20")
+    public float checkPlantCapacity(RecyclingPlant plant, String date) {
         if (token == null) throw new RuntimeException("No autenticado");
-        return serviceProxy.getPlantCapacity(plant.id(), token);
+        
+        // Delegamos en el proxy pasando la fecha
+        return serviceProxy.getPlantCapacity(plant.id(), date, token);
     }
 
     // 5. Asignar contenedores a planta

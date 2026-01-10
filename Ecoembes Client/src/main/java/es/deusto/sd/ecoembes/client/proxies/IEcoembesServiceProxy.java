@@ -15,8 +15,8 @@ public interface IEcoembesServiceProxy {
     List<RecyclingPlant> getPlants(String token);
 
     // 4. Check Capacity (Req: check its available capacity for current day)
-    // Devuelve un float con la capacidad disponible hoy
-    float getPlantCapacity(long plantId, String token);
+    // Devuelve un float con la capacidad disponible en la planta para la fecha dada
+    float getPlantCapacity(long plantId, String date, String token);
 
     // 5. Assign Dumpsters (Req: assign dumpsters... automatically receives notification)
     // Enviamos la lista de IDs de contenedores y la planta seleccionada

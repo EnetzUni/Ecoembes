@@ -1,68 +1,58 @@
-/**
- * This code is based on solutions provided by Claude Sonnet 3.5 and 
- * adapted using GitHub Copilot. It has been thoroughly reviewed 
- * and validated to ensure correctness and that it is free of errors.
- */
-package es.deusto.sd.auctions.client.swing;
+package es.deusto.sd.ecoembes.client.swing;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-import es.deusto.sd.auctions.client.data.Article;
-import es.deusto.sd.auctions.client.data.Category;
-import es.deusto.sd.auctions.client.data.Credentials;
-import es.deusto.sd.auctions.client.proxies.HttpServiceProxy;
-import es.deusto.sd.auctions.client.proxies.IAuctionsServiceProxy;
+import es.deusto.sd.ecoembes.client.data.*;
+import es.deusto.sd.ecoembes.client.proxies.HttpServiceProxy;
+import es.deusto.sd.ecoembes.client.proxies.IEcoembesServiceProxy;
 
-/**
- * SwingClientController class acts as a Controller in the Model-View-Controller 
- * (MVC) architectural pattern, managing the interaction between the SwingClientGUI 
- * (the View) and the IAuctionsServiceProxy (the Model). This class is responsible 
- * for handling user input, communicating with the service layer, and updating 
- * the view accordingly.
- * 
- * The class encapsulates the logic for user authentication (login/logout), 
- * retrieving categories and articles, and placing bids on articles. By utilizing 
- * the IAuctionsServiceProxy interface, the controller can interact with various 
- * implementations of the service proxy, such as HttpServiceProxy or RestTemplateServiceProxy, 
- * without being tightly coupled to any specific implementation. This promotes flexibility 
- * and allows for easier testing and maintenance of the application.
- * 
- * (Description generated with ChatGPT 4o mini)
- */
 public class SwingClientController {
-	// Service proxy for interacting with the AuctionsService using HTTP-based implementation
-	private IAuctionsServiceProxy serviceProxy = new HttpServiceProxy();
-	// Token to be used during the session
-    private String token;
 
-	public boolean login(String email, String password) {
+    private IEcoembesServiceProxy serviceProxy = new HttpServiceProxy();
+    private String token; // Guarda la "identidad del empleado"
+
+    // 1. Login
+    public boolean login(String email, String password) {
         try {
-            Credentials credentials = new Credentials(email, password);
-            token = serviceProxy.login(credentials);
-            
+            this.token = serviceProxy.login(new Credentials(email, password));
             return true;
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Login failed: " + e.getMessage());
+        } catch (Exception e) {
+            return false;
         }
     }
 
+    // 2. Obtener Info Contenedores (Location, Fill Level...)
+    public List<Dumpster> getAvailableDumpsters() {
+        if (token == null) throw new RuntimeException("No autenticado");
+        return serviceProxy.getDumpsters(token);
+    }
+
+    // 3. Obtener Plantas
+    public List<RecyclingPlant> getRecyclingPlants() {
+        if (token == null) throw new RuntimeException("No autenticado");
+        return serviceProxy.getPlants(token);
+    }
+
+    // 4. Consultar capacidad de una planta específica
+    public float checkPlantCapacity(RecyclingPlant plant) {
+        if (token == null) throw new RuntimeException("No autenticado");
+        return serviceProxy.getPlantCapacity(plant.id(), token);
+    }
+
+    // 5. Asignar contenedores a planta
+    public void assignDumpsters(RecyclingPlant selectedPlant, List<Dumpster> selectedDumpsters) {
+        if (token == null) throw new RuntimeException("No autenticado");
+        
+        // Extraemos solo los IDs para enviar al proxy
+        List<Long> ids = selectedDumpsters.stream()
+                                          .map(Dumpster::id)
+                                          .collect(Collectors.toList());
+        
+        serviceProxy.createAssignment(selectedPlant.id(), ids, token);
+    }
+    
     public void logout() {
-        serviceProxy.logout(token);
-    }
-
-    public List<Category> getCategories() {
-        return serviceProxy.getAllCategories();
-    }
-
-    public List<Article> getArticlesByCategory(String categoryName, String currency) {
-        return serviceProxy.getArticlesByCategory(categoryName, currency);
-    }
-
-    public Article getArticleDetails(Long articleId, String currency) {
-        return serviceProxy.getArticleDetails(articleId, currency);
-    }
-
-    public void placeBid(Long articleId, Float amount, String currency) {
-        serviceProxy.makeBid(articleId, amount, currency, token);
+        if (token != null) serviceProxy.logout(token);
     }
 }

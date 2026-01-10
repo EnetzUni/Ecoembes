@@ -1,199 +1,153 @@
-/**
- * This code is based on solutions provided by Claude Sonnet 3.5 and 
- * adapted using GitHub Copilot. It has been thoroughly reviewed 
- * and validated to ensure correctness and that it is free of errors.
- */
 package es.deusto.sd.ecoembes.client.proxies;
 
-import java.io.IOException;
 import java.net.URI;
-import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import es.deusto.sd.ecoembes.client.data.Article;
-import es.deusto.sd.ecoembes.client.data.Category;
-import es.deusto.sd.ecoembes.client.data.Credentials;
+import es.deusto.sd.ecoembes.client.data.*;
 
-/**
- * HttpServiceProxy class is an implementation of the Service Proxy design pattern
- * that communicates with the AuctionsService using simple HTTP requests via Java's
- * HttpClient. This class serves as an intermediary for the client to perform 
- * CRUD operations, such as user authentication (login/logout), retrieving categories 
- * and articles, and placing bids on articles. By encapsulating the HTTP request logic 
- * and handling various exceptions, this proxy provides a cleaner interface for clients 
- * to interact with the underlying service.
- * 
- * The class uses Java's HttpClient which allows for asynchronous and synchronous 
- * communication with HTTP servers. It leverages the `HttpRequest` and `HttpResponse` 
- * classes to construct and send requests, simplifying the process of making HTTP calls. 
- * The ObjectMapper from the Jackson library is employed to serialize and deserialize 
- * JSON data, facilitating easy conversion between Java objects and their JSON 
- * representations. This is particularly useful for converting complex data structures, 
- * like the `Credentials`, `Category`, and `Article` classes, into JSON format for 
- * transmission in HTTP requests, and vice versa for processing the responses.
- * 
- * The absence of the @Service annotation indicates that this class is not managed 
- * by a Spring container, which means that it will not benefit from Spring's 
- * dependency injection features. Instead, it operates independently, which can 
- * be suitable for applications preferring a more lightweight approach without 
- * the overhead of a full Spring context.
- * 
- * (Description generated with ChatGPT 4o mini)
- */
-public class HttpServiceProxy implements IAuctionsServiceProxy {
-    private static final String BASE_URL = "http://localhost:8081";
-    private final HttpClient httpClient;
-    private final ObjectMapper objectMapper;
+public class HttpServiceProxy implements IEcoembesServiceProxy {
 
-    public HttpServiceProxy() {
-        this.httpClient = HttpClient.newHttpClient();
-        this.objectMapper = new ObjectMapper();
-    }
+    private static final String BASE_URL = "http://localhost:8081"; 
+    
+    private final HttpClient httpClient = HttpClient.newHttpClient();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public String login(Credentials credentials) {
         try {
-            String credentialsJson = objectMapper.writeValueAsString(credentials);
-
+            String body = objectMapper.writeValueAsString(credentials);
             HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(BASE_URL + "/auth/login"))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(credentialsJson))
-                .build();
+                    .uri(URI.create(BASE_URL + "/auth/login"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(body))
+                    .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-            return switch (response.statusCode()) {
-                case 200 -> response.body(); // Successful login, returns token
-                case 401 -> throw new RuntimeException("Unauthorized: Invalid credentials");
-                default -> throw new RuntimeException("Login failed with status code: " + response.statusCode());
-            };
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException("Error during login", e);
-        }
+            
+            if (response.statusCode() == 200) {
+                return response.body(); // Retorna el token
+            } else {
+                throw new RuntimeException("Login fallido: " + response.statusCode());
+            }
+        } catch (Exception e) { throw new RuntimeException(e); }
     }
 
     @Override
     public void logout(String token) {
         try {
             HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(BASE_URL + "/auth/logout"))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(token))
-                .build();
+                    .uri(URI.create(BASE_URL + "/auth/logout"))
+                    .header("Content-Type", "text/plain")
+                    .POST(HttpRequest.BodyPublishers.ofString(token))
+                    .build();
+            httpClient.send(request, HttpResponse.BodyHandlers.discarding());
+        } catch (Exception e) { e.printStackTrace(); }
+    }
 
-            HttpResponse<Void> response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
+    @Override
+    public List<Dumpster> getDumpsters(String token) {
+        // Asumo que tienes un método GET /ecoembes/dumpsters en EcoembesController
+        // Si no lo tienes, usa /ecoembes/dumpsters (si lo creaste) o ajusta la ruta.
+        return sendGetRequest(BASE_URL + "/ecoembes/dumpsters", token, new TypeReference<List<Dumpster>>() {});
+    }
 
-            switch (response.statusCode()) {
-                case 204 -> {} // Logout successful
-                case 401 -> throw new RuntimeException("Unauthorized: Invalid token, logout failed");
-                default -> throw new RuntimeException("Logout failed with status code: " + response.statusCode());
+    @Override
+    public List<RecyclingPlant> getPlants(String token) {
+        // Ruta vista en EcoembesController: @GetMapping("/plants") -> /ecoembes/plants
+        return sendGetRequest(BASE_URL + "/ecoembes/plants", token, new TypeReference<List<RecyclingPlant>>() {});
+    }
+
+    @Override
+    public float getPlantCapacity(long plantId, String token) {
+        try {
+            // Ruta vista en ExternalController: @GetMapping("/capacity") -> /api/external/capacity
+            // Parametros: plantId y date
+            String date = LocalDate.now().toString(); // Usamos fecha de hoy
+            String url = BASE_URL + "/api/external/capacity?plantId=" + plantId + "&date=" + date;
+            
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("Authorization", "Bearer " + token)
+                    .GET()
+                    .build();
+            
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            
+            if (response.statusCode() == 200) {
+                // El ExternalController devuelve un Map JSON: {"capacity": 123.0, "status": "OK"...}
+                JsonNode node = objectMapper.readTree(response.body());
+                if (node.has("capacity")) {
+                    return (float) node.get("capacity").asDouble();
+                }
             }
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException("Error during logout", e);
-        }
+        } catch (Exception e) { e.printStackTrace(); }
+        
+        return -1f; // Indica error o no encontrado
     }
 
     @Override
-    public List<Category> getAllCategories() {
+    public void createAssignment(long plantId, List<Long> dumpsterIds, String token) {
         try {
-            HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(BASE_URL + "/auctions/categories"))
-                .header("Content-Type", "application/json")
-                .GET()
-                .build();
-
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-            return switch (response.statusCode()) {
-                case 200 -> objectMapper.readValue(response.body(), objectMapper.getTypeFactory().constructCollectionType(List.class, Category.class));
-                case 204 -> throw new RuntimeException("No Content: No categories found");
-                case 500 -> throw new RuntimeException("Internal server error while fetching categories");
-                default -> throw new RuntimeException("Failed to fetch categories with status code: " + response.statusCode());
-            };
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException("Error while fetching categories", e);
-        }
-    }
-    
-    @Override
-    public List<Article> getArticlesByCategory(String categoryName, String currency) {
-        try {
-            // Encode the category name to handle spaces and special characters
-            String encodedCategoryName = URLEncoder.encode(categoryName, StandardCharsets.UTF_8);
-        	
-            HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(BASE_URL + "/auctions/categories/" + encodedCategoryName + "/articles?currency=" + currency))
-                .header("Content-Type", "application/json")
-                .GET()
-                .build();
-
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-            return switch (response.statusCode()) {
-                case 200 -> objectMapper.readValue(response.body(), objectMapper.getTypeFactory().constructCollectionType(List.class, Article.class));
-                case 204 -> throw new RuntimeException("No Content: Category has no articles");
-                case 400 -> throw new RuntimeException("Bad Request: Currency not supported");
-                case 404 -> throw new RuntimeException("Not Found: Category not found");
-                case 500 -> throw new RuntimeException("Internal server error while fetching articles");
-                default -> throw new RuntimeException("Failed to fetch articles with status code: " + response.statusCode());
-            };
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException("Error while fetching articles by category", e);
-        }
-    }
-
-    @Override
-    public Article getArticleDetails(Long articleId, String currency) {
-        try {
-            HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(BASE_URL + "/auctions/articles/" + articleId + "/details?currency=" + currency))
-                .header("Content-Type", "application/json")
-                .GET()
-                .build();
-
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-            return switch (response.statusCode()) {
-                case 200 -> objectMapper.readValue(response.body(), Article.class);
-                case 400 -> throw new RuntimeException("Bad Request: Currency not supported");
-                case 404 -> throw new RuntimeException("Not Found: Article not found");
-                case 500 -> throw new RuntimeException("Internal server error while fetching article details");
-                default -> throw new RuntimeException("Failed to fetch article details with status code: " + response.statusCode());
-            };
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException("Error while fetching article details", e);
-        }
-    }
-
-    @Override
-    public void makeBid(Long articleId, Float amount, String currency, String token) {
-        try {
-            HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(BASE_URL + "/auctions/articles/" + articleId + "/bid?amount=" + amount + "&currency=" + currency))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(token))
-                .build();
-
-            HttpResponse<Void> response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
-
-            switch (response.statusCode()) {
-                case 204 -> {} // Bid placed successfully
-                case 400 -> throw new RuntimeException("Bad Request: Currency not supported");
-                case 401 -> throw new RuntimeException("Unauthorized: User not authenticated");
-                case 404 -> throw new RuntimeException("Not Found: Article not found");
-                case 409 -> throw new RuntimeException("Conflict: Bid amount must be greater than the current price");
-                case 500 -> throw new RuntimeException("Internal server error while placing a bid");
-                default -> throw new RuntimeException("Failed to make a bid with status code: " + response.statusCode());
+            // TRUCO: Construimos un JSON que parezca un AssignmentDTO.
+            // El servidor espera: { "recyclingPlantId": X, "dumpsters": [ { "id": Y }, { "id": Z } ], "date": "..." }
+            
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("recyclingPlantId", plantId);
+            payload.put("date", LocalDate.now().toString()); // Fecha hoy
+            
+            // Convertimos la lista de IDs a una lista de objetos básicos para que Jackson cree [{"id":1}, {"id":2}]
+            List<Map<String, Long>> dumpstersList = new ArrayList<>();
+            for (Long id : dumpsterIds) {
+                Map<String, Long> d = new HashMap<>();
+                d.put("id", id);
+                dumpstersList.add(d);
             }
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException("Error while making a bid", e);
-        }
+            payload.put("dumpsters", dumpstersList);
+
+            String json = objectMapper.writeValueAsString(payload);
+            
+            // Ruta asumida en EcoembesController: POST /ecoembes/assignments
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(BASE_URL + "/ecoembes/assignments"))
+                    .header("Authorization", "Bearer " + token)
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            
+            if (response.statusCode() != 200 && response.statusCode() != 201) {
+                throw new RuntimeException("Error creando asignación (" + response.statusCode() + "): " + response.body());
+            }
+        } catch (Exception e) { throw new RuntimeException(e); }
+    }
+
+    // Método auxiliar genérico para GET
+    private <T> List<T> sendGetRequest(String url, String token, TypeReference<List<T>> typeRef) {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("Authorization", "Bearer " + token)
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                return objectMapper.readValue(response.body(), typeRef);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return List.of(); // Retorna lista vacía en caso de error
     }
 }

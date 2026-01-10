@@ -116,30 +116,14 @@ public class EcoembesController {
         }
     }
 
-    // --- 5. ¿ESTÁ LLENO? (GET) ---
-    @Operation(summary = "Is Dumpster Full?", description = "Check if fill level > 50%")
-    @GetMapping("/dumpsters/{id}/filled")
-    public ResponseEntity<Boolean> isDumpsterFull(@PathVariable("id") long id) {
-        try {
-            // Obtenemos el contenedor y miramos su último nivel conocido (esto depende de tu lógica, aquí miro el historial reciente)
-            // Si quieres algo simple:
-            Dumpster d = dumpsterService.getDumpsterById(id);
-            // Suponemos que la capacidad actual hay que buscarla o calcularla. 
-            // Para simplificar, devolvemos TRUE. Puedes mejorar esto conectándolo con el último FillRecord.
-            return ResponseEntity.ok(true); 
-        } catch (Exception e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    // --- 7. LISTAR TODAS LAS PLANTAS (GET) ---
+    // --- 5. LISTAR TODAS LAS PLANTAS (GET) ---
     @Operation(summary = "Get All Plants", description = "Retrieve a list of all recycling plants")
     @GetMapping("/plants")
     public ResponseEntity<List<RecyclingPlant>> getAllPlants() {
         return ResponseEntity.ok(recyclingPlantRepository.findAll());
     }
 
-    // --- 8. LISTAR TODAS LAS ASIGNACIONES (GET) ---
+    // --- 6. LISTAR TODAS LAS ASIGNACIONES (GET) ---
     @Operation(summary = "Get All Assignments", description = "Retrieve a list of all route assignments")
     @GetMapping("/assignments")
     public ResponseEntity<List<Assignment>> getAllAssignments() {

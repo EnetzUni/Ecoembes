@@ -1,7 +1,5 @@
 package es.deusto.sd.ecoembes.dto;
 
-import java.util.List;
-
 public class RecyclingPlantDTO {
     private long id;
     private String name;

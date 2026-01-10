@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import es.deusto.sd.ecoembes.dto.CapacityRequestDTO;
 import es.deusto.sd.ecoembes.dto.CapacityResponseDTO; // Asegúrate de que este DTO existe en Ecoembes también
-import es.deusto.sd.ecoembes.entity.Assignment;
 
 @Component
 public class SocketRecyclingGateway implements IExternalRecyclingGateway {

@@ -10,11 +10,11 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import es.deusto.sd.auctions.client.data.Article;
-import es.deusto.sd.auctions.client.data.Category;
-import es.deusto.sd.auctions.client.data.Credentials;
-import es.deusto.sd.auctions.client.proxies.HttpServiceProxy;
-import es.deusto.sd.auctions.client.proxies.IAuctionsServiceProxy;
+import es.deusto.sd.ecoembes.client.data.Article;
+import es.deusto.sd.ecoembes.client.data.Category;
+import es.deusto.sd.ecoembes.client.data.Credentials;
+import es.deusto.sd.ecoembes.client.proxies.HttpServiceProxy;
+import es.deusto.sd.ecoembes.client.proxies.IAuctionsServiceProxy;
 
 /**
  * ConsoleClient class serves as a basic client implementation for the AuctionsService 

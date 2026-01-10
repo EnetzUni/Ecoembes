@@ -3,13 +3,13 @@
  * adapted using GitHub Copilot. It has been thoroughly reviewed 
  * and validated to ensure correctness and that it is free of errors.
  */
-package es.deusto.sd.auctions.client.proxies;
+package es.deusto.sd.ecoembes.client.proxies;
 
 import java.util.List;
 
-import es.deusto.sd.auctions.client.data.Article;
-import es.deusto.sd.auctions.client.data.Category;
-import es.deusto.sd.auctions.client.data.Credentials;
+import es.deusto.sd.ecoembes.client.data.Article;
+import es.deusto.sd.ecoembes.client.data.Category;
+import es.deusto.sd.ecoembes.client.data.Credentials;
 
 /**
  * IAuctionsServiceProxy interface defines a contract for communication 

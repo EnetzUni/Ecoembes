@@ -3,7 +3,7 @@
  * adapted using GitHub Copilot. It has been thoroughly reviewed 
  * and validated to ensure correctness and that it is free of errors.
  */
-package es.deusto.sd.auctions.client.proxies;
+package es.deusto.sd.ecoembes.client.proxies;
 
 import java.io.IOException;
 import java.net.URI;
@@ -16,9 +16,9 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import es.deusto.sd.auctions.client.data.Article;
-import es.deusto.sd.auctions.client.data.Category;
-import es.deusto.sd.auctions.client.data.Credentials;
+import es.deusto.sd.ecoembes.client.data.Article;
+import es.deusto.sd.ecoembes.client.data.Category;
+import es.deusto.sd.ecoembes.client.data.Credentials;
 
 /**
  * HttpServiceProxy class is an implementation of the Service Proxy design pattern

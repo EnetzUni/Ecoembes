@@ -18,7 +18,7 @@ import es.deusto.sd.ecoembes.client.model.*;
 
 public class HttpServiceProxy implements IEcoembesServiceProxy {
 
-    private static final String BASE_URL = "http://localhost:8081"; 
+    private static final String BASE_URL = "http://localhost:8082"; 
     
     private final HttpClient httpClient = HttpClient.newHttpClient();
     private final ObjectMapper objectMapper = new ObjectMapper();

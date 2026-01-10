@@ -19,7 +19,7 @@ public class LoginView {
         if (iconURL != null) {
             frame.setIconImage(new ImageIcon(iconURL).getImage());
         } else {
-            ImageIcon fileIcon = new ImageIcon("src/resources/images/EcoembesLogo1080x1080.png");
+            ImageIcon fileIcon = new ImageIcon("EcoembesClient/src/resources/images/EcoembesLogo1080x1080.png");
             frame.setIconImage(fileIcon.getImage());
         }
 
@@ -35,7 +35,7 @@ public class LoginView {
         URL bannerURL = getClass().getResource("/EcoembesLogo4320x1080.png");
         
         if (bannerURL != null) bannerIcon = new ImageIcon(bannerURL);
-        else bannerIcon = new ImageIcon("src/resources/images/EcoembesLogo4320x1080.png");
+        else bannerIcon = new ImageIcon("EcoembesClient/src/resources/images/EcoembesLogo4320x1080.png");
 
         if (bannerIcon.getIconWidth() > 0) {
             Image scaledImage = bannerIcon.getImage().getScaledInstance(500, 125, Image.SCALE_SMOOTH);

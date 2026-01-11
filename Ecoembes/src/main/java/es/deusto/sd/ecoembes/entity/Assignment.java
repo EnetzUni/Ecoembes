@@ -1,7 +1,9 @@
 package es.deusto.sd.ecoembes.entity;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -16,41 +18,40 @@ public class Assignment {
     @ManyToOne(optional = false)
     private Employee employee;
 
-    // Relación con Planta
-    @ManyToOne(optional = true) 
-    @JoinColumn(name = "recycling_plant_id", nullable = true)
+    // Un assignment pertenece a una planta
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "recycling_plant_id")
     private RecyclingPlant recyclingPlant;
 
-    // Relación con Contenedor
-    @ManyToOne(optional = false)
-    @JsonIgnore
-    @JoinColumn(name = "dumpster_id")
-    private Dumpster dumpster;
+    // Un assignment puede tener VARIOS dumpsters
+    @OneToMany
+    @JoinColumn(name = "assignment_id") // FK en la tabla dumpster
+    private List<Dumpster> dumpsters = new ArrayList<>();
 
     public Assignment() {}
 
-    // --- CONSTRUCTOR CORREGIDO (Ahora acepta los 4 campos) ---
-    public Assignment(String date, Employee employee, Dumpster dumpster, RecyclingPlant recyclingPlant) {
+    //
+    public Assignment(String date, Employee employee, RecyclingPlant recyclingPlant, List<Dumpster> dumpsters) {
         this.date = date;
         this.employee = employee;
-        this.dumpster = dumpster;
         this.recyclingPlant = recyclingPlant;
+        this.dumpsters = dumpsters;
     }
 
-    // Getters y Setters
     public long getId() { return id; }
-    
+
     public String getDate() { return date; }
     public void setDate(String date) { this.date = date; }
 
     public Employee getEmployee() { return employee; }
     public void setEmployee(Employee employee) { this.employee = employee; }
-    
+
     public RecyclingPlant getRecyclingPlant() { return recyclingPlant; }
     public void setRecyclingPlant(RecyclingPlant recyclingPlant) { this.recyclingPlant = recyclingPlant; }
 
-    public Dumpster getDumpster() { return dumpster; }
-    public void setDumpster(Dumpster dumpster) { this.dumpster = dumpster; }
+    public List<Dumpster> getDumpsters() { return dumpsters; }
+    public void setDumpsters(List<Dumpster> dumpsters) { this.dumpsters = dumpsters; }
+
 
     @Override
     public int hashCode() { return Objects.hash(id); }

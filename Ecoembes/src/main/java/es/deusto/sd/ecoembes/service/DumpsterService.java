@@ -27,12 +27,18 @@ public class DumpsterService {
     public Dumpster updateDumpsterInfo(long id, float fillLevel, String date) {
         Dumpster dumpster = dumpsterRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Dumpster not found"));
+
+        // 1. Guardar en el histórico (ESTO LO TENÍAS BIEN)
         FillLevelRecord record = new FillLevelRecord();
         record.setDumpster(dumpster);
         record.setDate(date);
         record.setFillLevel(fillLevel);
         fillLevelRecordRepository.save(record);
-        return dumpster;
+
+        // 2. ACTUALIZAR EL CONTENEDOR (ESTO FALTABA)
+        // Si no haces esto, el contenedor sigue diciendo que está al 0% aunque hayas metido un registro del 100%
+        dumpster.setFillLevel(fillLevel); 
+        return dumpsterRepository.save(dumpster); // Guardamos el cambio en el propio contenedor
     }
 
     public Dumpster getDumpsterById(long id) {

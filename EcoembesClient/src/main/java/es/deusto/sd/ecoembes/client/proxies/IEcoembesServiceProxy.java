@@ -21,4 +21,8 @@ public interface IEcoembesServiceProxy {
     // 5. Assign Dumpsters (Req: assign dumpsters... automatically receives notification)
     // Enviamos la lista de IDs de contenedores y la planta seleccionada
     void createAssignment(long plantId, List<Long> dumpsterIds, String token);
+    
+    
+    List<Assignment> getAssignments(String token);
+    
 }

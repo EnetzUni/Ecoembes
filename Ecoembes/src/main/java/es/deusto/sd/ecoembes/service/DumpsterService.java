@@ -74,7 +74,14 @@ public class DumpsterService {
         return fillLevelRecordRepository.findByDumpsterIdAndDateBetween(id, startDate, endDate);
     }
 
-    public DumpsterDTO toDTO(Dumpster dumpster) {
-        return new DumpsterDTO(dumpster.getId(), dumpster.getLocation(), dumpster.getMaxCapacity());
+    public DumpsterDTO toDTO(Dumpster d) {
+        return new DumpsterDTO(
+            d.getId(),
+            d.getLocation(),
+            d.getContainerCount(),
+            d.getFillLevel(),
+            d.getMaxCapacity()
+        );
     }
+
 }

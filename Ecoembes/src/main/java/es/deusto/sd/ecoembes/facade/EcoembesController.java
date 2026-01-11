@@ -3,21 +3,21 @@ package es.deusto.sd.ecoembes.facade;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.http.HttpStatus;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import es.deusto.sd.ecoembes.dao.EmployeeRepository;
 import es.deusto.sd.ecoembes.dao.RecyclingPlantRepository;
+import es.deusto.sd.ecoembes.dao.AssignmentRepository;
 import es.deusto.sd.ecoembes.dto.DumpsterDTO;
 import es.deusto.sd.ecoembes.entity.Dumpster;
 import es.deusto.sd.ecoembes.entity.Employee;
 import es.deusto.sd.ecoembes.entity.FillLevelRecord;
 import es.deusto.sd.ecoembes.entity.RecyclingPlant;
+import es.deusto.sd.ecoembes.entity.Assignment;
 import es.deusto.sd.ecoembes.service.AssignmentService;
 import es.deusto.sd.ecoembes.service.DumpsterService;
-import es.deusto.sd.ecoembes.dao.AssignmentRepository; // <--- NUEVO IMPORT
-import es.deusto.sd.ecoembes.entity.Assignment; // <--- Para que reconozca la entidad
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -31,18 +31,18 @@ public class EcoembesController {
     private final AssignmentService assignmentService;
     private final RecyclingPlantRepository recyclingPlantRepository;
     private final EmployeeRepository employeeRepository;
-    private final AssignmentRepository assignmentRepository; // <--- NUEVA VARIABLE
+    private final AssignmentRepository assignmentRepository;
 
     public EcoembesController(DumpsterService dumpsterService, 
                               AssignmentService assignmentService,
                               RecyclingPlantRepository recyclingPlantRepository,
                               EmployeeRepository employeeRepository,
-                              AssignmentRepository assignmentRepository) { // <--- NUEVO PARAMETRO
+                              AssignmentRepository assignmentRepository) {
         this.dumpsterService = dumpsterService;
         this.assignmentService = assignmentService;
         this.recyclingPlantRepository = recyclingPlantRepository;
         this.employeeRepository = employeeRepository;
-        this.assignmentRepository = assignmentRepository; // <--- NUEVA ASIGNACION
+        this.assignmentRepository = assignmentRepository;
     }
 
     // --- 1. BUSCAR CONTENEDORES ---
@@ -63,36 +63,49 @@ public class EcoembesController {
         }
     }
 
-    // --- 2. ASIGNAR RUTAS ---
+    // --- 2. ASIGNAR RUTAS (Nuevo: JSON con varios dumpsters) ---
     @Operation(summary = "Assign Dumpsters", description = "Assign dumpsters to a plant and employee")
     @PostMapping("/assignments")
-    public ResponseEntity<Void> assignDumpsters(
-            @RequestParam(name = "dumpsterIds") List<Long> dumpsterIds,
-            @RequestParam(name = "plantId") long plantId,
-            @RequestParam(name = "employeeId") long employeeId) {
+    public ResponseEntity<Void> assignDumpsters(@RequestBody AssignRequest request) {
         try {
-            RecyclingPlant plant = recyclingPlantRepository.findById(plantId)
+            RecyclingPlant plant = recyclingPlantRepository.findById(request.getPlantId())
                     .orElseThrow(() -> new RuntimeException("Planta no encontrada"));
-            Employee employee = employeeRepository.findById(employeeId)
+            Employee employee = employeeRepository.findById(request.getEmployeeId())
                     .orElseThrow(() -> new RuntimeException("Empleado no encontrado"));
-            List<Dumpster> dumpsters = dumpsterIds.stream()
+            List<Dumpster> dumpsters = request.getDumpsterIds().stream()
                     .map(dumpsterService::getDumpsterById)
                     .collect(Collectors.toList());
 
             assignmentService.assignDumpstersToPlant(dumpsters, plant, employee);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+
+            return ResponseEntity.noContent().build();
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().build();
         }
     }
 
-    // --- 3. ACTUALIZAR NIVEL DE LLENADO (PUT) ---
+    // DTO para recibir JSON de asignación
+    public static class AssignRequest {
+        private List<Long> dumpsterIds;
+        private long plantId;
+        private long employeeId;
+
+        public List<Long> getDumpsterIds() { return dumpsterIds; }
+        public void setDumpsterIds(List<Long> dumpsterIds) { this.dumpsterIds = dumpsterIds; }
+
+        public long getPlantId() { return plantId; }
+        public void setPlantId(long plantId) { this.plantId = plantId; }
+
+        public long getEmployeeId() { return employeeId; }
+        public void setEmployeeId(long employeeId) { this.employeeId = employeeId; }
+    }
+
+    // --- 3. ACTUALIZAR NIVEL DE LLENADO ---
     @Operation(summary = "Update Fill Level", description = "Register a new fill level for a dumpster")
     @PutMapping("/dumpsters/{id}/fill-level")
     public ResponseEntity<?> updateFillLevel(@PathVariable("id") long id, @RequestBody FillRequest request) {
         try {
-            // Llamamos al servicio con los datos del JSON
             Dumpster updatedDumpster = dumpsterService.updateDumpsterInfo(id, request.getFillLevel(), request.getDate());
             return ResponseEntity.ok(dumpsterService.toDTO(updatedDumpster));
         } catch (Exception e) {
@@ -101,7 +114,7 @@ public class EcoembesController {
         }
     }
 
-    // --- 4. CONSULTAR HISTORIAL (GET) ---
+    // --- 4. CONSULTAR HISTORIAL ---
     @Operation(summary = "Get Usage History", description = "Get fill level history for a dumpster")
     @GetMapping("/dumpsters/{id}/usage")
     public ResponseEntity<List<FillLevelRecord>> getDumpsterUsage(
@@ -116,22 +129,21 @@ public class EcoembesController {
         }
     }
 
-    // --- 5. LISTAR TODAS LAS PLANTAS (GET) ---
+    // --- 5. LISTAR TODAS LAS PLANTAS ---
     @Operation(summary = "Get All Plants", description = "Retrieve a list of all recycling plants")
     @GetMapping("/plants")
     public ResponseEntity<List<RecyclingPlant>> getAllPlants() {
         return ResponseEntity.ok(recyclingPlantRepository.findAll());
     }
 
-    // --- 6. LISTAR TODAS LAS ASIGNACIONES (GET) ---
+    // --- 6. LISTAR TODAS LAS ASIGNACIONES ---
     @Operation(summary = "Get All Assignments", description = "Retrieve a list of all route assignments")
     @GetMapping("/assignments")
     public ResponseEntity<List<Assignment>> getAllAssignments() {
-        // Esto devolverá la lista completa de asignaciones con sus empleados y contenedores
         return ResponseEntity.ok(assignmentRepository.findAll());
     }
 
-    // --- CLASE AUXILIAR PARA LEER EL JSON (DTO INTERNO) ---
+    // --- DTO para fill-level ---
     public static class FillRequest {
         private float fillLevel;
         private String date;

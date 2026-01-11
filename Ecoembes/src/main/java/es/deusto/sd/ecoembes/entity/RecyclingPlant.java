@@ -18,30 +18,28 @@ public class RecyclingPlant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    
     private String name;
     private String location;
 
-    // RELACIÓN NUEVA: Una planta tiene muchos Assignments
-    // 'mappedBy = "recyclingPlant"' indica que la clave ajena está en la clase Assignment
+    //vale, he añadido esto q si no es imposible asignar dumpsters xq pone x defecto 0 asiq nunca tienen espacio
+    private float capacity;
+    
+    
+    //cambaido a uno a muchos
     @OneToMany(mappedBy = "recyclingPlant")
     @JsonIgnore // <--- AÑADE ESTO AQUÍ
     private List<Assignment> assignments = new ArrayList<>();
 
-    // ------------ //
-    // Constructors //
-    // ------------ //
 
     public RecyclingPlant() {}
 
-    public RecyclingPlant(String name, String location) {
+    public RecyclingPlant(String name, String location, float capacity) {
         this.name = name;
         this.location = location;
+        this.capacity = capacity;
     }
+    
 
-    // ----------------- //
-    // Getters & Setters //
-    // ----------------- //
     
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
@@ -52,12 +50,16 @@ public class RecyclingPlant {
     public String getLocation() { return location; }
     public void setLocation(String location) { this.location = location; }
 
+ 
+    public float getCapacity() { return capacity; }
+    public void setCapacity(float capacity) { this.capacity = capacity; }
+
+
     public List<Assignment> getAssignments() { return assignments; }
     public void setAssignments(List<Assignment> assignments) { this.assignments = assignments; }
 
-    // ----------------- //
-    // hashCode & Equals //
-    // ----------------- //
+
+
 
     @Override
     public int hashCode() { return Objects.hash(id); }
@@ -72,6 +74,6 @@ public class RecyclingPlant {
 
     @Override
     public String toString() {
-        return "RecyclingPlant [id=" + id + ", name=" + name + ", location=" + location + "]";
+        return "RecyclingPlant [id=" + id + ", name=" + name + ", location=" + location + ", capacity=" + capacity + "]";
     }
 }

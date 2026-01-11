@@ -41,10 +41,13 @@ public class LoginController implements ActionListener {
 
             // Create the new Menu View
             MenuView menuView = new MenuView();
+            new MenuController(menuView, token); //q si no los botones no me van
 
             // Switch using your GuiUtils
             // Note: Ensure MenuView also has a public getFrame() method!
             GuiUtils.switchFrames(view.getFrame(), menuView.getFrame());
+            
+            
 
         } else {
             // --- FAILURE: SHOW ERROR ---

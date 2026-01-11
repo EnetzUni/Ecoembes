@@ -6,8 +6,8 @@
 -- IMPORTANTE: Los IDs deben coincidir con lo que esperan tus Factories
 -- ID 1 -> Sockets (ContSocket)
 -- ID 2 -> REST (PlasSB)
-INSERT INTO recycling_plant (id, name, location) VALUES (1, 'ContSocket Ltd.', 'Madrid - Sockets');
-INSERT INTO recycling_plant (id, name, location) VALUES (2, 'PlasSB Ltd.', 'Bilbao - REST API');
+INSERT INTO recycling_plant (id, name, location, capacity) VALUES (1, 'ContSocket Ltd.', 'Madrid - Sockets', 1200.0);
+INSERT INTO recycling_plant (id, name, location, capacity) VALUES (2, 'PlasSB Ltd.', 'Bilbao - REST API', 1500.0);
 
 -- 2. EMPLEADOS (ADAPTADO A TU CONSTRUCTOR)
 -- Columnas: ID, NAME, EMAIL, PASSWORD
@@ -16,13 +16,12 @@ INSERT INTO employee (id, name, email, password) VALUES (1, 'Admin General', 'ad
 INSERT INTO employee (id, name, email, password) VALUES (2, 'Pepe Recicla', 'pepe@ecoembes.com', 'pepe123');
 
 -- 3. CONTENEDORES (DUMPSTERS)
--- CORRECCIÓN: Usamos 'max_capacity' en vez de 'capacity'.
--- CORRECCIÓN: Quitamos 'fill_level' porque tu clase Dumpster NO tiene ese campo persistente (lo tienes en fill_level_record).
-INSERT INTO dumpster (id, location, max_capacity) VALUES (101, 'Calle Gran Vía 1', 1000.0);
-INSERT INTO dumpster (id, location, max_capacity) VALUES (102, 'Plaza Mayor', 800.0);
-INSERT INTO dumpster (id, location, max_capacity) VALUES (103, 'Paseo Castellana 50', 1200.0);
-INSERT INTO dumpster (id, location, max_capacity) VALUES (104, 'Barrio Salamanca', 1000.0);
-INSERT INTO dumpster (id, location, max_capacity) VALUES (105, 'Puerta del Sol', 1500.0);
+
+INSERT INTO dumpster (id, location, max_capacity, container_count, fill_level) VALUES (101, 'Calle Gran Vía 1', 1000.0, 10, 0.85);
+INSERT INTO dumpster (id, location, max_capacity, container_count, fill_level) VALUES (102, 'Plaza Mayor', 800.0, 8, 0.95);
+INSERT INTO dumpster (id, location, max_capacity, container_count, fill_level) VALUES (103, 'Paseo Castellana 50', 1200.0, 12, 0.20);
+INSERT INTO dumpster (id, location, max_capacity, container_count, fill_level) VALUES (104, 'Barrio Salamanca', 1000.0, 10, 0.45);
+INSERT INTO dumpster (id, location, max_capacity, container_count, fill_level) VALUES (105, 'Puerta del Sol', 1500.0, 15, 0.99);
 
 -- 4. REGISTROS DE LLENADO (OPCIONAL - Para que no salgan vacíos)
 -- Si quieres que tengan datos, insertamos en la tabla histórica que Hibernate creó.

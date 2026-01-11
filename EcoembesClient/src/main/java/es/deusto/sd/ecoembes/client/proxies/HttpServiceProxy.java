@@ -57,21 +57,70 @@ public class HttpServiceProxy implements IEcoembesServiceProxy {
 
     @Override
     public List<Dumpster> getDumpsters(String token) {
-        // Asumo que tienes un método GET /ecoembes/dumpsters en EcoembesController
-        // Si no lo tienes, usa /ecoembes/dumpsters (si lo creaste) o ajusta la ruta.
-        return sendGetRequest(BASE_URL + "/ecoembes/dumpsters", token, new TypeReference<List<Dumpster>>() {});
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(BASE_URL + "/ecoembes/dumpsters"))
+                    .header("Authorization", "Bearer " + token)
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                JsonNode root = objectMapper.readTree(response.body());
+                List<Dumpster> dumpsters = new ArrayList<>();
+
+                for (JsonNode node : root) {
+                    long id = node.get("id").asLong();
+                    String location = node.get("location").asText();
+                    float maxCapacity = (float) node.get("maxCapacity").asDouble();
+
+                    int containerCount = node.has("containerCount") ? node.get("containerCount").asInt() : 0;
+                    float fillLevel = node.has("fillLevel") ? (float) node.get("fillLevel").asDouble() : 0f;
+
+                    dumpsters.add(new Dumpster(id, location, maxCapacity, containerCount, fillLevel));
+                }
+                return dumpsters;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return List.of();
     }
 
     @Override
     public List<RecyclingPlant> getPlants(String token) {
-        // Ruta vista en EcoembesController: @GetMapping("/plants") -> /ecoembes/plants
-        return sendGetRequest(BASE_URL + "/ecoembes/plants", token, new TypeReference<List<RecyclingPlant>>() {});
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(BASE_URL + "/ecoembes/plants"))
+                    .header("Authorization", "Bearer " + token)
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                JsonNode root = objectMapper.readTree(response.body());
+                List<RecyclingPlant> plants = new ArrayList<>();
+
+                for (JsonNode node : root) {
+                    long id = node.get("id").asLong();
+                    String name = node.get("name").asText();
+                    String location = node.get("location").asText();
+                    float capacity = (float) node.get("capacity").asDouble();
+
+                    plants.add(new RecyclingPlant(id, name, location, capacity));
+                }
+
+                return plants;
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return List.of();
     }
 
     @Override
     public float getPlantCapacity(long plantId, String date, String token) {
         try {
-            // CAMBIO: Usamos la variable 'date' del argumento directamente en la URL
             String url = BASE_URL + "/api/external/capacity?plantId=" + plantId + "&date=" + date;
             
             HttpRequest request = HttpRequest.newBuilder()
@@ -83,7 +132,6 @@ public class HttpServiceProxy implements IEcoembesServiceProxy {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             
             if (response.statusCode() == 200) {
-                // Leemos el JSON {"capacity": 123.0, ...}
                 JsonNode node = objectMapper.readTree(response.body());
                 if (node.has("capacity")) {
                     return (float) node.get("capacity").asDouble();
@@ -91,31 +139,19 @@ public class HttpServiceProxy implements IEcoembesServiceProxy {
             }
         } catch (Exception e) { e.printStackTrace(); }
         
-        return -1f; // Retorno de error
+        return -1f;
     }
 
     @Override
     public void createAssignment(long plantId, List<Long> dumpsterIds, String token) {
         try {
-            // TRUCO: Construimos un JSON que parezca un AssignmentDTO.
-            // El servidor espera: { "recyclingPlantId": X, "dumpsters": [ { "id": Y }, { "id": Z } ], "date": "..." }
-            
             Map<String, Object> payload = new HashMap<>();
             payload.put("recyclingPlantId", plantId);
-            payload.put("date", LocalDate.now().toString()); // Fecha hoy
-            
-            // Convertimos la lista de IDs a una lista de objetos básicos para que Jackson cree [{"id":1}, {"id":2}]
-            List<Map<String, Long>> dumpstersList = new ArrayList<>();
-            for (Long id : dumpsterIds) {
-                Map<String, Long> d = new HashMap<>();
-                d.put("id", id);
-                dumpstersList.add(d);
-            }
-            payload.put("dumpsters", dumpstersList);
+            payload.put("date", LocalDate.now().toString());
+            payload.put("dumpsters", new ArrayList<>(dumpsterIds));
 
             String json = objectMapper.writeValueAsString(payload);
-            
-            // Ruta asumida en EcoembesController: POST /ecoembes/assignments
+
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(BASE_URL + "/ecoembes/assignments"))
                     .header("Authorization", "Bearer " + token)
@@ -131,7 +167,6 @@ public class HttpServiceProxy implements IEcoembesServiceProxy {
         } catch (Exception e) { throw new RuntimeException(e); }
     }
 
-    // Método auxiliar genérico para GET
     private <T> List<T> sendGetRequest(String url, String token, TypeReference<List<T>> typeRef) {
         try {
             HttpRequest request = HttpRequest.newBuilder()
@@ -146,6 +181,13 @@ public class HttpServiceProxy implements IEcoembesServiceProxy {
                 return objectMapper.readValue(response.body(), typeRef);
             }
         } catch (Exception e) { e.printStackTrace(); }
-        return List.of(); // Retorna lista vacía en caso de error
+        return List.of();
+    }
+
+    @Override
+    public List<Assignment> getAssignments(String token) {
+        return sendGetRequest(BASE_URL + "/ecoembes/assignments", token, new TypeReference<List<Assignment>>() {});
     }
 }
+
+

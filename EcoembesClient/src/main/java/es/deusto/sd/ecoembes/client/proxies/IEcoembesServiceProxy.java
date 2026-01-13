@@ -14,11 +14,14 @@ public interface IEcoembesServiceProxy {
     // 3. Get Plants (Req: select any recycling plant)
     List<RecyclingPlant> getPlants(String token);
 
-    // 4. Check Capacity (Req: check its available capacity for current day)
+    // 4. Create Dumpster (Req: create new dumpster)
+    Dumpster createDumpster(Dumpster dumpster, String token);
+
+    // 5. Check Capacity (Req: check its available capacity for current day)
     // Devuelve un float con la capacidad disponible en la planta para la fecha dada
     float getPlantCapacity(long plantId, String date, String token);
 
-    // 5. Assign Dumpsters (Req: assign dumpsters... automatically receives notification)
+    // 6. Assign Dumpsters (Req: assign dumpsters... automatically receives notification)
     // Enviamos la lista de IDs de contenedores y la planta seleccionada
     void createAssignment(long plantId, List<Long> dumpsterIds, String token);
     

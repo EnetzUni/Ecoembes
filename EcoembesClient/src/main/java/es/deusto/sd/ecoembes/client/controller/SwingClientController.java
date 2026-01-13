@@ -54,6 +54,21 @@ public class SwingClientController {
         
         serviceProxy.createAssignment(selectedPlant.id(), ids, token);
     }
+
+    // 6. Crear nuevo contenedor
+    public void createNewDumpster(String location, float maxCapacity, int containerCount) {
+
+        // Creamos un objeto temporal con ID 0 y fillLevel 0 (valores por defecto para creación)
+        Dumpster newDumpster = new Dumpster(0, location, maxCapacity, containerCount, 0.0f);
+
+        try {
+            Dumpster created = serviceProxy.createDumpster(newDumpster, token);
+            System.out.println("Contenedor creado con ID: " + created.id());
+        } catch (Exception e) {
+            System.err.println("Error al crear el contenedor: " + e.getMessage());
+            // Aquí podrías lanzar la excepción hacia arriba si quieres mostrar un popup en la UI
+        }
+    }   
     
     public void logout() {
         if (token != null) serviceProxy.logout(token);

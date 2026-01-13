@@ -36,9 +36,9 @@ public class HttpServiceProxy implements IEcoembesServiceProxy {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             
             if (response.statusCode() == 200) {
-                return response.body(); // Retorna el token
+                return response.body(); // Returns the token
             } else {
-                throw new RuntimeException("Login fallido: " + response.statusCode());
+                throw new RuntimeException("Login failed: " + response.statusCode());
             }
         } catch (Exception e) { throw new RuntimeException(e); }
     }
@@ -91,11 +91,8 @@ public class HttpServiceProxy implements IEcoembesServiceProxy {
     @Override
     public Dumpster createDumpster(Dumpster dumpster, String token) {
         try {
-            // 1. Convertir el objeto Java a JSON string
             String jsonBody = objectMapper.writeValueAsString(dumpster);
         
-            // 2. Construir la petición POST
-            // Asumo que el endpoint en EcoembesController es @PostMapping("/dumpsters")
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(BASE_URL + "/ecoembes/dumpsters"))
                     .header("Authorization", "Bearer " + token)
@@ -103,19 +100,16 @@ public class HttpServiceProxy implements IEcoembesServiceProxy {
                     .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                     .build();
         
-            // 3. Enviar y recibir respuesta
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         
-            // 4. Verificar éxito (200 OK o 201 Created)
             if (response.statusCode() == 200 || response.statusCode() == 201) {
-                // Convertir la respuesta del servidor (DumpsterDTO) de nuevo a tu record Dumpster
                 return objectMapper.readValue(response.body(), Dumpster.class);
             } else {
-                throw new RuntimeException("Error creando dumpster: " + response.statusCode() + " - " + response.body());
+                throw new RuntimeException("Error creating dumpster: " + response.statusCode() + " - " + response.body());
             }
         
         } catch (Exception e) {
-            throw new RuntimeException("Error en la comunicación al crear dumpster", e);
+            throw new RuntimeException("Error in communication while creating dumpster", e);
         }
     }
 
@@ -177,9 +171,14 @@ public class HttpServiceProxy implements IEcoembesServiceProxy {
     public void createAssignment(long plantId, List<Long> dumpsterIds, String token) {
         try {
             Map<String, Object> payload = new HashMap<>();
-            payload.put("recyclingPlantId", plantId);
+            
+            // --- FIXED: Use "plantId" instead of "recyclingPlantId" ---
+            payload.put("plantId", plantId); 
+            
             payload.put("date", LocalDate.now().toString());
-            payload.put("dumpsters", new ArrayList<>(dumpsterIds));
+            
+            // --- FIXED: Use "dumpsterIds" (This was already partly fixed in your snippet) ---
+            payload.put("dumpsterIds", new ArrayList<>(dumpsterIds)); 
 
             String json = objectMapper.writeValueAsString(payload);
 
@@ -193,7 +192,7 @@ public class HttpServiceProxy implements IEcoembesServiceProxy {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             
             if (response.statusCode() != 200 && response.statusCode() != 201) {
-                throw new RuntimeException("Error creando asignación (" + response.statusCode() + "): " + response.body());
+                throw new RuntimeException("Error creating assignment (" + response.statusCode() + "): " + response.body());
             }
         } catch (Exception e) { throw new RuntimeException(e); }
     }
@@ -220,5 +219,3 @@ public class HttpServiceProxy implements IEcoembesServiceProxy {
         return sendGetRequest(BASE_URL + "/ecoembes/assignments", token, new TypeReference<List<Assignment>>() {});
     }
 }
-
-

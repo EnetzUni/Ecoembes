@@ -39,12 +39,14 @@ public class LoginController implements ActionListener {
             // --- SUCCESS: SWITCH FRAMES ---
             System.out.println("Login successful! Token: " + token);
 
-            // Create the new Menu View
+            // 1. Create the View (The Body)
             MenuView menuView = new MenuView();
-            new MenuController(menuView, token); //q si no los botones no me van
 
-            // Switch using your GuiUtils
-            // Note: Ensure MenuView also has a public getFrame() method!
+            // 2. Create the Controller (The Brain)
+            // Passing the view to the controller activates the buttons!
+            new MenuController(menuView, token);
+
+            // 3. Switch Frames
             GuiUtils.switchFrames(view.getFrame(), menuView.getFrame());
             
             

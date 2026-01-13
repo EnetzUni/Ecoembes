@@ -25,7 +25,7 @@ sourceSets {
 }
 
 dependencies {
-	// Add any necessary dependencies here
+	implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.1'
 }
 
 // Task to run the swing client

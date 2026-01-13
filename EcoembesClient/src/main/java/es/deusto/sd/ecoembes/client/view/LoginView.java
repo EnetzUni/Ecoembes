@@ -1,6 +1,9 @@
 package es.deusto.sd.ecoembes.client.view;
 
 import javax.swing.*;
+
+import es.deusto.sd.ecoembes.client.util.GuiUtils;
+
 import java.awt.*;
 import java.net.URL;
 
@@ -11,22 +14,7 @@ public class LoginView {
     private JPasswordField passwordField;
 
     public LoginView() {
-        frame = new JFrame("Ecoembes");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        // --- 1. ICON SETUP ---
-        URL iconURL = getClass().getResource("/EcoembesLogo1080x1080.png");
-        if (iconURL != null) {
-            frame.setIconImage(new ImageIcon(iconURL).getImage());
-        } else {
-            ImageIcon fileIcon = new ImageIcon("EcoembesClient/src/resources/images/EcoembesLogo1080x1080.png");
-            frame.setIconImage(fileIcon.getImage());
-        }
-
-        // --- WINDOW SETTINGS ---
-        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        frame.setResizable(false);
-        frame.getContentPane().setBackground(Color.WHITE);
+        this.frame = GuiUtils.setupFrame();
         frame.setLayout(new GridBagLayout()); 
 
         // --- 2. TOP BANNER IMAGE ---

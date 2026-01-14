@@ -24,15 +24,16 @@ public class MenuController {
     private final MenuView view;
     private final IEcoembesServiceProxy serviceProxy;
     private String token; 
-    
+    private Long currentEmployeeId;
     private List<Long> selectedDumpsterIds = new ArrayList<>();
     
     @SuppressWarnings("unused")
     private String assignLeftState = MenuView.STATE_DUMPSTERS;
 
-    public MenuController(MenuView view, String token) {
+    public MenuController(MenuView view, String token, Long employeeId) {
         this.view = view;
         this.token = token;
+        this.currentEmployeeId = employeeId; 
         this.serviceProxy = new HttpServiceProxy();
         initController();
     }
@@ -224,34 +225,47 @@ public class MenuController {
     }
 
     private void performCreateAssignment() {
-        try {
-            String plantString = view.getSelectedPlantString();
-            if (plantString == null || plantString.trim().isEmpty()) {
-                JOptionPane.showMessageDialog(view.getFrame(), "Please select a Recycling Plant.");
-                return;
-            }
-            long plantId = Long.parseLong(plantString.split(" - ")[0].trim());
-            List<Long> cleanDumpsterIds = selectedDumpsterIds.stream().filter(Objects::nonNull).collect(Collectors.toList());
-
-            if (cleanDumpsterIds.isEmpty()) {
-                JOptionPane.showMessageDialog(view.getFrame(), "Please select at least one Dumpster.");
-                return;
-            }
-
-            serviceProxy.createAssignment(plantId, cleanDumpsterIds, token);
-            JOptionPane.showMessageDialog(view.getFrame(), "Assignment created successfully!");
-            
-            selectedDumpsterIds.clear();
-            updateDumpsterButtonText(selectedDumpsterIds, view.getSelectDumpstersButton());
-            setAssignState(MenuView.STATE_ASSIGNMENTS);
-            view.showCard(MenuView.VIEW_ASSIGNMENTS);
-            loadAssignmentsForMainView(); 
-
-        } catch (Exception e) {
-            handleError("Error creating assignment", e);
+    try {
+        // 1. Obtener ID de la Planta
+        String plantString = view.getSelectedPlantString();
+        if (plantString == null || plantString.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(view.getFrame(), "Please select a Recycling Plant.");
+            return;
         }
-    }
+        long plantId = Long.parseLong(plantString.split(" - ")[0].trim());
 
+        // 2. Obtener IDs de los Contenedores
+        List<Long> cleanDumpsterIds = selectedDumpsterIds.stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        if (cleanDumpsterIds.isEmpty()) {
+            JOptionPane.showMessageDialog(view.getFrame(), "Please select at least one Dumpster.");
+            return;
+        }
+
+        // 3. CHECK DE SEGURIDAD: Verificar que tenemos el ID del empleado
+        if (this.currentEmployeeId == null) {
+            JOptionPane.showMessageDialog(view.getFrame(), "Session Error: Missing Employee ID. Please logout and login again.");
+            return;
+        }
+
+        // 4. LLAMADA AL PROXY (Ahora incluyendo el employeeId)
+        serviceProxy.createAssignment(plantId, cleanDumpsterIds, this.currentEmployeeId, token);
+
+        // 5. Éxito y Limpieza de UI
+        JOptionPane.showMessageDialog(view.getFrame(), "Assignment created successfully!");
+        
+        selectedDumpsterIds.clear();
+        updateDumpsterButtonText(selectedDumpsterIds, view.getSelectDumpstersButton());
+        setAssignState(MenuView.STATE_ASSIGNMENTS);
+        view.showCard(MenuView.VIEW_ASSIGNMENTS);
+        loadAssignmentsForMainView(); 
+
+    } catch (Exception e) {
+        handleError("Error creating assignment", e);
+    }
+}
     // --- Data Loaders ---
     private void loadRecyclingPlants() {
         try { view.updateRecyclingTable(createRecyclingTable(serviceProxy.getPlants(token))); } 
@@ -276,8 +290,43 @@ public class MenuController {
     }
 
     private void loadAssignmentsForMainView() {
-        try { view.updateAssignmentsTable(createAssignmentTable(serviceProxy.getAssignments(token))); } 
-        catch (Exception ex) { handleError("Error loading assignments", ex); }
+        try {
+            // 1. Obtener datos
+            List<Assignment> assignments = serviceProxy.getAssignments(token);
+            
+            // 2. Crear modelo de tabla
+            String[] columns = {"ID", "Date", "Employee ID", "Plant ID", "Dumpster IDs"};
+            DefaultTableModel model = new DefaultTableModel(columns, 0);
+    
+            for (Assignment a : assignments) {
+                String dumpstersText = "None";
+                
+                // Formatear la lista de IDs para que se vea bien (ej: "4, 6")
+                if (a.dumpsters() != null && !a.dumpsters().isEmpty()) {
+                    dumpstersText = a.dumpsters().stream()
+                        .map(d -> String.valueOf(d.id()))
+                        .collect(Collectors.joining(", "));
+                }
+    
+                model.addRow(new Object[]{
+                    a.id(), 
+                    a.date(), 
+                    a.employeeId(), 
+                    a.recyclingPlantId(), 
+                    dumpstersText
+                });
+            }
+            
+            // 3. Crear la tabla configurada
+            JTable table = new JTable(model);
+            table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+
+            // 4. USAR EL NUEVO MÉTODO DE LA VISTA (¡Aquí estaba el error!)
+            view.updateAssignmentsTable(table);
+            
+        } catch (Exception e) {
+            handleError("Error loading assignments", e);
+        }
     }
     private void loadAssignmentsForAssignView() {
         try { view.updateAssignDumpstersLeftTable(createAssignmentTable(serviceProxy.getAssignments(token))); } 
@@ -327,4 +376,6 @@ public class MenuController {
         new LoginController(loginView); 
         GuiUtils.switchFrames(view.getFrame(), loginView.getFrame());
     }
+
+    
 }

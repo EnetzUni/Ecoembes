@@ -2,6 +2,8 @@ package es.deusto.sd.ecoembes.client.controller;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Map;
+
 import javax.swing.JOptionPane;
 
 import es.deusto.sd.ecoembes.client.model.Credentials;
@@ -16,6 +18,7 @@ public class LoginController implements ActionListener {
     private IEcoembesServiceProxy serviceProxy = new HttpServiceProxy();
     private LoginView view;
     private String token;
+    private Long loggedEmployeeId;
 
     // Constructor wires the View to this Controller
     public LoginController(LoginView view) {
@@ -24,7 +27,6 @@ public class LoginController implements ActionListener {
         this.view.addSubmitListener(this);
     }
 
-    @Override
     public void actionPerformed(ActionEvent e) {
         // 1. Get data from the view
         String email = view.getLoginEmailString();
@@ -37,18 +39,18 @@ public class LoginController implements ActionListener {
 
         if (success) {
             // --- SUCCESS: SWITCH FRAMES ---
-            System.out.println("Login successful! Token: " + token);
+            System.out.println("Login successful! Token: " + token + " | ID: " + loggedEmployeeId);
 
             // 1. Create the View (The Body)
             MenuView menuView = new MenuView();
 
             // 2. Create the Controller (The Brain)
             // Passing the view to the controller activates the buttons!
-            new MenuController(menuView, token);
+            // AHORA PASAMOS EL ID TAMBIÉN
+            new MenuController(menuView, token, loggedEmployeeId);
 
             // 3. Switch Frames
             GuiUtils.switchFrames(view.getFrame(), menuView.getFrame());
-            
             
 
         } else {
@@ -63,14 +65,27 @@ public class LoginController implements ActionListener {
 
     public boolean login(String email, String password) {
         try {
-            // Only returns a token if credentials are correct
-            this.token = serviceProxy.login(new Credentials(email, password));
-            return this.token != null && !this.token.isEmpty();
+            // El proxy devuelve ahora un Map<String, Object>
+            Map<String, Object> response = serviceProxy.login(new Credentials(email, password));
+            
+            if (response != null && response.containsKey("token")) {
+                // 1. Guardamos el Token
+                this.token = (String) response.get("token");
+                
+                // 2. Guardamos el ID (Usamos Number para evitar errores de cast Integer/Long)
+                if (response.containsKey("employeeId")) {
+                    Number num = (Number) response.get("employeeId");
+                    this.loggedEmployeeId = num.longValue();
+                }
+                
+                return true;
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
         }
+        return false;
     }
+
 
     public void logout() {
         if (token != null) serviceProxy.logout(token);

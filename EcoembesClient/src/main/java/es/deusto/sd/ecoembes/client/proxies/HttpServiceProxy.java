@@ -4,11 +4,11 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -21,10 +21,12 @@ public class HttpServiceProxy implements IEcoembesServiceProxy {
     private static final String BASE_URL = "http://localhost:8082"; 
     
     private final HttpClient httpClient = HttpClient.newHttpClient();
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper()
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     @Override
-    public String login(Credentials credentials) {
+
+    public Map<String, Object> login(Credentials credentials) {
         try {
             String body = objectMapper.writeValueAsString(credentials);
             HttpRequest request = HttpRequest.newBuilder()
@@ -36,11 +38,13 @@ public class HttpServiceProxy implements IEcoembesServiceProxy {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             
             if (response.statusCode() == 200) {
-                return response.body(); // Returns the token
-            } else {
-                throw new RuntimeException("Login failed: " + response.statusCode());
+                // Truco: Convertimos el JSON {"token":"...", "employeeId":1} a un Mapa Java
+                return objectMapper.readValue(response.body(), new TypeReference<Map<String, Object>>(){});
             }
-        } catch (Exception e) { throw new RuntimeException(e); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null; // Si falla
     }
 
     @Override
@@ -172,19 +176,23 @@ public class HttpServiceProxy implements IEcoembesServiceProxy {
     }
 
     @Override
-    public void createAssignment(long plantId, List<Long> dumpsterIds, String token) {
+    public void createAssignment(long plantId, List<Long> dumpsterIds, Long employeeId, String token) {
         try {
-            Map<String, Object> payload = new HashMap<>();
+            Map<String, Object> assignmentData = new HashMap<>();
             
-            // --- FIXED: Use "plantId" instead of "recyclingPlantId" ---
-            payload.put("plantId", plantId); 
+            // 1. Coincide con: public Long recyclingPlantId;
+            assignmentData.put("recyclingPlantId", plantId); 
             
-            payload.put("date", LocalDate.now().toString());
+            // 2. Coincide con: public List<Long> dumpsterIds;
+            assignmentData.put("dumpsterIds", dumpsterIds);
             
-            // --- FIXED: Use "dumpsterIds" (This was already partly fixed in your snippet) ---
-            payload.put("dumpsterIds", new ArrayList<>(dumpsterIds)); 
+            // 3. Coincide con: public Long employeeId;
+            assignmentData.put("employeeId", employeeId); 
 
-            String json = objectMapper.writeValueAsString(payload);
+            String json = objectMapper.writeValueAsString(assignmentData);
+
+            // DEBUG: Verás que ahora sí envía los nombres correctos
+            System.out.println("JSON enviado: " + json);
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(BASE_URL + "/ecoembes/assignments"))
@@ -196,9 +204,14 @@ public class HttpServiceProxy implements IEcoembesServiceProxy {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             
             if (response.statusCode() != 200 && response.statusCode() != 201) {
-                throw new RuntimeException("Error creating assignment (" + response.statusCode() + "): " + response.body());
+                System.err.println("Error Server: " + response.body());
+                throw new RuntimeException("Error (" + response.statusCode() + "): " + response.body());
             }
-        } catch (Exception e) { throw new RuntimeException(e); }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error de conexión al crear asignación");
+        }
     }
 
     private <T> List<T> sendGetRequest(String url, String token, TypeReference<List<T>> typeRef) {

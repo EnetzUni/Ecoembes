@@ -374,9 +374,6 @@ public class MenuView {
     public void updateCreateDumpstersLeftTable(JTable table) { updateContainer(createDumpstersLeftContainer, table); }
 
     public void updateRecyclingTable(JTable table) { updatePanelContent(recyclingPanel, table); }
-    public void updateAssignmentsTable(JTable table) { updatePanelContent(assignmentsPanel, table); }
-    public void updateDumpstersTable(JTable table) { updatePanelContent(dumpstersPanel, table); }
-
     private void updatePanelContent(JPanel panel, JTable table) {
         BorderLayout layout = (BorderLayout) panel.getLayout();
         Component center = layout.getLayoutComponent(BorderLayout.CENTER);
@@ -492,4 +489,30 @@ public class MenuView {
     public JTextField getCreateCapacityField() { return createCapacityField; }
     public JSpinner getCreateContainerSpinner() { return createContainerSpinner; }
     public JSlider getCreateFillSlider() { return createFillSlider; }
+    
+    public void updateAssignmentsTable(JTable table) {
+        if (assignmentsPanel != null) {
+            assignmentsPanel.removeAll();
+            assignmentsPanel.add(new JScrollPane(table), BorderLayout.CENTER);
+            assignmentsPanel.revalidate();
+            assignmentsPanel.repaint();
+        }
+    }
+
+    /**
+     * Borra la tabla anterior de contenedores y pone la nueva (por si lo necesitas).
+     */
+    public void updateDumpstersTable(JTable table) {
+        if (dumpstersPanel != null) {
+            dumpstersPanel.removeAll();
+            dumpstersPanel.add(new JScrollPane(table), BorderLayout.CENTER);
+            dumpstersPanel.revalidate();
+            dumpstersPanel.repaint();
+        }
+    }
+
+    // Getter de seguridad por si acaso
+    public JPanel getAssignmentsPanel() {
+        return assignmentsPanel;
+    }
 }

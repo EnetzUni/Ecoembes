@@ -1,6 +1,7 @@
 package es.deusto.sd.ecoembes.client.controller;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import es.deusto.sd.ecoembes.client.model.*;
@@ -10,16 +11,31 @@ import es.deusto.sd.ecoembes.client.proxies.IEcoembesServiceProxy;
 public class SwingClientController {
 
     private IEcoembesServiceProxy serviceProxy = new HttpServiceProxy();
+    private Long currentEmployeeId;
     private String token; // Guarda la "identidad del empleado"
 
     // 1. Login
     public boolean login(String email, String password) {
         try {
-            this.token = serviceProxy.login(new Credentials(email, password));
-            return true;
+            // Ahora recibimos un Mapa
+            Map<String, Object> response = serviceProxy.login(new Credentials(email, password));
+            
+            if (response != null && response.containsKey("token")) {
+                // 1. Guardamos el Token
+                this.token = (String) response.get("token");
+                
+                // 2. Guardamos el ID (con seguridad de tipos)
+                if (response.containsKey("employeeId")) {
+                    Number idNum = (Number) response.get("employeeId");
+                    this.currentEmployeeId = idNum.longValue();
+                }
+                
+                return true;
+            }
         } catch (Exception e) {
-            return false;
+            e.printStackTrace();
         }
+        return false;
     }
 
     // 2. Obtener Info Contenedores (Location, Fill Level...)
@@ -52,7 +68,7 @@ public class SwingClientController {
                                           .map(Dumpster::id)
                                           .collect(Collectors.toList());
         
-        serviceProxy.createAssignment(selectedPlant.id(), ids, token);
+        serviceProxy.createAssignment(selectedPlant.id(), ids, currentEmployeeId, token);
     }
 
     // 6. Crear nuevo contenedor

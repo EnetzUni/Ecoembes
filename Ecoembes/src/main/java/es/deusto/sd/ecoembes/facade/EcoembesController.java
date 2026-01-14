@@ -210,7 +210,7 @@ public class EcoembesController {
     // CLASES INTERNAS (DTOs Rápidos)
     // ==========================================
 
-    // Clase para recibir el JSON del cliente (La que usa tu compañera)
+    
     public static class AssignmentRequest {
         public Long recyclingPlantId; 
         public Long employeeId;

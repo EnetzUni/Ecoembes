@@ -4,7 +4,7 @@ public class DumpsterDTO {
 
     private long id;
     private String location;
-    private int containerCount;
+    private Integer containerCount;
     private float fillLevel;
     private float maxCapacity;
 
@@ -13,7 +13,7 @@ public class DumpsterDTO {
     }
 
     // 2. Constructor completo (AQUÍ ESTÁ LA CLAVE)
-    public DumpsterDTO(long id, String location, int containerCount, float fillLevel, float maxCapacity) {
+    public DumpsterDTO(long id, String location, Integer containerCount, float fillLevel, float maxCapacity) {
         this.id = id; // <--- ¡ASEGÚRATE DE QUE ESTA LÍNEA EXISTE!
         this.location = location;
         this.containerCount = containerCount;

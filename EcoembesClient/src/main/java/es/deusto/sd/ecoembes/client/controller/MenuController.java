@@ -74,10 +74,66 @@ public class MenuController {
         // --- Form Logic ---
         view.getCreateAssignmentButton().addActionListener(e -> performCreateAssignment());
         
-        // Create Dumpster Button (Placeholder)
         view.getCreateDumpstersSubmitButton().addActionListener(e -> {
-            // Logic to be implemented later
-        });
+    try {
+        // 1. RECOGER DATOS (Usando los componentes correctos de MenuView)
+        String location = view.getCreateLocationField().getText();
+        String capacityText = view.getCreateCapacityField().getText();
+        
+        // JSpinner devuelve un Object, hay que castear a Integer
+        int containerCount = (Integer) view.getCreateContainerSpinner().getValue();
+        
+        // JSlider devuelve un int (0 a 100), representa el % de llenado inicial
+        int fillPercentage = view.getCreateFillSlider().getValue();
+
+        // VALIDACIONES BÁSICAS
+        if (location == null || location.trim().isEmpty() || capacityText.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(view.getFrame(), "❌ Por favor, introduce Ubicación y Capacidad.");
+            return;
+        }
+
+        // 2. CONVERSIONES Y CÁLCULOS
+        float maxCapacity = Float.parseFloat(capacityText);
+        
+        // CUIDADO AQUÍ: Tu record valida que fillLevel <= maxCapacity.
+        // El slider da un %, así que calculamos los litros/kilos reales.
+        float currentFillLevel = maxCapacity * (fillPercentage / 100.0f);
+
+        // 3. CREAR OBJETO DUMPSTER
+        // ID va a 0L porque el servidor lo autogenera.
+        Dumpster newDumpster = new Dumpster(0L, location, maxCapacity, containerCount, currentFillLevel);
+
+        System.out.println("📤 Enviando a crear: " + newDumpster);
+
+        // 4. LLAMADA AL SERVIDOR
+        Dumpster created = serviceProxy.createDumpster(newDumpster, token);
+
+        // 5. ACTUALIZAR INTERFAZ
+        if (created != null) {
+            JOptionPane.showMessageDialog(view.getFrame(), 
+                "✅ Contenedor creado con éxito.\nID asignado: " + created.id());
+
+            // Limpiar formulario
+            view.getCreateLocationField().setText("");
+            view.getCreateCapacityField().setText("");
+            view.getCreateContainerSpinner().setValue(1); // Reset al valor por defecto
+            view.getCreateFillSlider().setValue(0);       // Reset slider a 0
+
+            
+        } else {
+            JOptionPane.showMessageDialog(view.getFrame(), 
+                "⚠️ El servidor no devolvió el contenedor creado (Posible error de validación).");
+        }
+
+    } catch (NumberFormatException ex) {
+        JOptionPane.showMessageDialog(view.getFrame(), 
+            "❌ Error de formato: La capacidad debe ser un número (ej. 1000.5).");
+    } catch (Exception ex) {
+        ex.printStackTrace();
+        JOptionPane.showMessageDialog(view.getFrame(), 
+            "❌ Error de conexión: " + ex.getMessage());
+    }
+});
         
         view.getSelectDumpstersButton().addActionListener(e -> {
             try {

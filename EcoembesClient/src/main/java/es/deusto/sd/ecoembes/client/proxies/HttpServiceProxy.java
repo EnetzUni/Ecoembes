@@ -91,25 +91,29 @@ public class HttpServiceProxy implements IEcoembesServiceProxy {
     @Override
     public Dumpster createDumpster(Dumpster dumpster, String token) {
         try {
-            String jsonBody = objectMapper.writeValueAsString(dumpster);
-        
+            // Usamos TU clase Dumpster directamente. Jackson se encarga.
+            String json = objectMapper.writeValueAsString(dumpster);
+
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(BASE_URL + "/ecoembes/dumpsters"))
                     .header("Authorization", "Bearer " + token)
                     .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .POST(HttpRequest.BodyPublishers.ofString(json))
                     .build();
-        
+
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        
+
             if (response.statusCode() == 200 || response.statusCode() == 201) {
+                // ¡AQUÍ ESTÁ LA MAGIA!
+                // Leemos la respuesta del server y la convertimos de vuelta a tu clase Dumpster
                 return objectMapper.readValue(response.body(), Dumpster.class);
             } else {
-                throw new RuntimeException("Error creating dumpster: " + response.statusCode() + " - " + response.body());
+                throw new RuntimeException("Error creando Dumpster (" + response.statusCode() + "): " + response.body());
             }
-        
+
         } catch (Exception e) {
-            throw new RuntimeException("Error in communication while creating dumpster", e);
+            e.printStackTrace();
+            return null; // O lanza excepción si prefieres
         }
     }
 

@@ -75,66 +75,76 @@ public class MenuController {
         // --- Form Logic ---
         view.getCreateAssignmentButton().addActionListener(e -> performCreateAssignment());
         
+        // --- Create Dumpster Submit Logic ---
         view.getCreateDumpstersSubmitButton().addActionListener(e -> {
-    try {
-        // 1. RECOGER DATOS (Usando los componentes correctos de MenuView)
-        String location = view.getCreateLocationField().getText();
-        String capacityText = view.getCreateCapacityField().getText();
-        
-        // JSpinner devuelve un Object, hay que castear a Integer
-        int containerCount = (Integer) view.getCreateContainerSpinner().getValue();
-        
-        // JSlider devuelve un int (0 a 100), representa el % de llenado inicial
-        int fillPercentage = view.getCreateFillSlider().getValue();
+            try {
+                // 1. RECOGER DATOS (Usando los componentes correctos de MenuView)
+                String location = view.getCreateLocationField().getText();
+                String capacityText = view.getCreateCapacityField().getText();
+                
+                // JSpinner devuelve un Object, hay que castear a Integer
+                int containerCount = (Integer) view.getCreateContainerSpinner().getValue();
+                
+                // JSlider devuelve un int (0 a 100), representa el % de llenado inicial
+                int fillPercentage = view.getCreateFillSlider().getValue();
 
-        // VALIDACIONES BÁSICAS
-        if (location == null || location.trim().isEmpty() || capacityText.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(view.getFrame(), "❌ Por favor, introduce Ubicación y Capacidad.");
-            return;
-        }
+                // VALIDACIONES BÁSICAS
+                if (location == null || location.trim().isEmpty() || capacityText.trim().isEmpty()) {
+                    JOptionPane.showMessageDialog(view.getFrame(), "❌ Por favor, introduce Ubicación y Capacidad.");
+                    return;
+                }
 
-        // 2. CONVERSIONES Y CÁLCULOS
-        float maxCapacity = Float.parseFloat(capacityText);
-        
-        // CUIDADO AQUÍ: Tu record valida que fillLevel <= maxCapacity.
-        // El slider da un %, así que calculamos los litros/kilos reales.
-        float currentFillLevel = maxCapacity * (fillPercentage / 100.0f);
+                // 2. CONVERSIONES Y CÁLCULOS
+                float maxCapacity = Float.parseFloat(capacityText);
+                
+                // CUIDADO AQUÍ: Tu record valida que fillLevel <= maxCapacity.
+                // El slider da un %, así que calculamos los litros/kilos reales.
+                float currentFillLevel = fillPercentage / 100.0f;
 
-        // 3. CREAR OBJETO DUMPSTER
-        // ID va a 0L porque el servidor lo autogenera.
-        Dumpster newDumpster = new Dumpster(0L, location, maxCapacity, containerCount, currentFillLevel);
+                // 3. CREAR OBJETO DUMPSTER
+                // ID va a 0L porque el servidor lo autogenera.
+                Dumpster newDumpster = new Dumpster(0L, location, maxCapacity, containerCount, currentFillLevel);
 
-        System.out.println("📤 Enviando a crear: " + newDumpster);
+                System.out.println("📤 Enviando a crear: " + newDumpster);
 
-        // 4. LLAMADA AL SERVIDOR
-        Dumpster created = serviceProxy.createDumpster(newDumpster, token);
+                // 4. LLAMADA AL SERVIDOR
+                Dumpster created = serviceProxy.createDumpster(newDumpster, token);
 
-        // 5. ACTUALIZAR INTERFAZ
-        if (created != null) {
-            JOptionPane.showMessageDialog(view.getFrame(), 
-                "✅ Contenedor creado con éxito.\nID asignado: " + created.id());
+                // 5. ACTUALIZAR INTERFAZ
+                if (created != null) {
+                    JOptionPane.showMessageDialog(view.getFrame(), 
+                        "✅ Contenedor creado con éxito.\nID asignado: " + created.id());
 
-            // Limpiar formulario
-            view.getCreateLocationField().setText("");
-            view.getCreateCapacityField().setText("");
-            view.getCreateContainerSpinner().setValue(1); // Reset al valor por defecto
-            view.getCreateFillSlider().setValue(0);       // Reset slider a 0
+                    // Limpiar formulario
+                    view.getCreateLocationField().setText("");
+                    view.getCreateCapacityField().setText("");
+                    view.getCreateContainerSpinner().setValue(1); // Reset al valor por defecto
+                    view.getCreateFillSlider().setValue(0);       // Reset slider a 0
 
-            
-        } else {
-            JOptionPane.showMessageDialog(view.getFrame(), 
-                "⚠️ El servidor no devolvió el contenedor creado (Posible error de validación).");
-        }
+                    // -------------------------------------------------------------
+                    // UPDATED CODE: Wait 1 second (1000ms) then reload the table
+                    // -------------------------------------------------------------
+                    Timer timer = new Timer(1000, event -> {
+                        loadDumpstersForCreateView();
+                        System.out.println("🔄 Table reloaded after 1 second delay.");
+                    });
+                    timer.setRepeats(false); // Execute only once
+                    timer.start();
+                    
+                } else {
+                    JOptionPane.showMessageDialog(view.getFrame(), 
+                        "⚠️ El servidor no devolvió el contenedor creado (Posible error de validación).");
+                }
 
-    } catch (NumberFormatException ex) {
-        JOptionPane.showMessageDialog(view.getFrame(), 
-            "❌ Error de formato: La capacidad debe ser un número (ej. 1000.5).");
-    } catch (Exception ex) {
-        ex.printStackTrace();
-        JOptionPane.showMessageDialog(view.getFrame(), 
-            "❌ Error de conexión: " + ex.getMessage());
-    }
-});
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(view.getFrame(), 
+                    "❌ Error de formato: La capacidad debe ser un número (ej. 1000.5).");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(view.getFrame(), 
+                    "❌ Error de conexión: " + ex.getMessage());
+            }
+        });
         
         view.getSelectDumpstersButton().addActionListener(e -> {
             try {
@@ -225,47 +235,48 @@ public class MenuController {
     }
 
     private void performCreateAssignment() {
-    try {
-        // 1. Obtener ID de la Planta
-        String plantString = view.getSelectedPlantString();
-        if (plantString == null || plantString.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(view.getFrame(), "Please select a Recycling Plant.");
-            return;
+        try {
+            // 1. Obtener ID de la Planta
+            String plantString = view.getSelectedPlantString();
+            if (plantString == null || plantString.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(view.getFrame(), "Please select a Recycling Plant.");
+                return;
+            }
+            long plantId = Long.parseLong(plantString.split(" - ")[0].trim());
+
+            // 2. Obtener IDs de los Contenedores
+            List<Long> cleanDumpsterIds = selectedDumpsterIds.stream()
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+
+            if (cleanDumpsterIds.isEmpty()) {
+                JOptionPane.showMessageDialog(view.getFrame(), "Please select at least one Dumpster.");
+                return;
+            }
+
+            // 3. CHECK DE SEGURIDAD: Verificar que tenemos el ID del empleado
+            if (this.currentEmployeeId == null) {
+                JOptionPane.showMessageDialog(view.getFrame(), "Session Error: Missing Employee ID. Please logout and login again.");
+                return;
+            }
+
+            // 4. LLAMADA AL PROXY (Ahora incluyendo el employeeId)
+            serviceProxy.createAssignment(plantId, cleanDumpsterIds, this.currentEmployeeId, token);
+
+            // 5. Éxito y Limpieza de UI
+            JOptionPane.showMessageDialog(view.getFrame(), "Assignment created successfully!");
+            
+            selectedDumpsterIds.clear();
+            updateDumpsterButtonText(selectedDumpsterIds, view.getSelectDumpstersButton());
+            setAssignState(MenuView.STATE_ASSIGNMENTS);
+            view.showCard(MenuView.VIEW_ASSIGNMENTS);
+            loadAssignmentsForMainView(); 
+
+        } catch (Exception e) {
+            handleError("Error creating assignment", e);
         }
-        long plantId = Long.parseLong(plantString.split(" - ")[0].trim());
-
-        // 2. Obtener IDs de los Contenedores
-        List<Long> cleanDumpsterIds = selectedDumpsterIds.stream()
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-
-        if (cleanDumpsterIds.isEmpty()) {
-            JOptionPane.showMessageDialog(view.getFrame(), "Please select at least one Dumpster.");
-            return;
-        }
-
-        // 3. CHECK DE SEGURIDAD: Verificar que tenemos el ID del empleado
-        if (this.currentEmployeeId == null) {
-            JOptionPane.showMessageDialog(view.getFrame(), "Session Error: Missing Employee ID. Please logout and login again.");
-            return;
-        }
-
-        // 4. LLAMADA AL PROXY (Ahora incluyendo el employeeId)
-        serviceProxy.createAssignment(plantId, cleanDumpsterIds, this.currentEmployeeId, token);
-
-        // 5. Éxito y Limpieza de UI
-        JOptionPane.showMessageDialog(view.getFrame(), "Assignment created successfully!");
-        
-        selectedDumpsterIds.clear();
-        updateDumpsterButtonText(selectedDumpsterIds, view.getSelectDumpstersButton());
-        setAssignState(MenuView.STATE_ASSIGNMENTS);
-        view.showCard(MenuView.VIEW_ASSIGNMENTS);
-        loadAssignmentsForMainView(); 
-
-    } catch (Exception e) {
-        handleError("Error creating assignment", e);
     }
-}
+    
     // --- Data Loaders ---
     private void loadRecyclingPlants() {
         try { view.updateRecyclingTable(createRecyclingTable(serviceProxy.getPlants(token))); } 
@@ -321,7 +332,7 @@ public class MenuController {
             JTable table = new JTable(model);
             table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 
-            // 4. USAR EL NUEVO MÉTODO DE LA VISTA (¡Aquí estaba el error!)
+            // 4. USAR EL NUEVO MÉTODO DE LA VISTA
             view.updateAssignmentsTable(table);
             
         } catch (Exception e) {
@@ -376,6 +387,4 @@ public class MenuController {
         new LoginController(loginView); 
         GuiUtils.switchFrames(view.getFrame(), loginView.getFrame());
     }
-
-    
 }
